@@ -48,7 +48,7 @@ a { color: var(--green); }
   background: var(--paper); color: var(--green); font-family: var(--body); font-size: 15px;
 }
 .tape-chip {
-  display: inline-block; font-family: var(--hand); font-weight: 700; font-size: 20px; line-height: 1;
+  display: inline-block; font-family: var(--hand); font-weight: 700; font-size: 20px; line-height: 1; white-space: nowrap; flex: none;
   color: #fff; background: var(--c, var(--green)); padding: 5px 12px 6px;
   clip-path: polygon(0 0, 100% 0, 96% 25%, 100% 50%, 96% 75%, 100% 100%, 0 100%, 4% 75%, 0 50%, 4% 25%);
 }

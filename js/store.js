@@ -72,7 +72,7 @@ export const fmtDate = (d, opts = { weekday: 'short', day: 'numeric', month: 'sh
 
 export function fmtMoney(n, cur) {
   if (n == null || n === '' || isNaN(n)) return '';
-  try { return new Intl.NumberFormat('en', { style: 'currency', currency: cur, maximumFractionDigits: 0 }).format(n); }
+  try { return new Intl.NumberFormat('en', { style: 'currency', currency: cur, currencyDisplay: 'narrowSymbol', maximumFractionDigits: 0 }).format(n); }
   catch { return `${cur} ${Math.round(n)}`; }
 }
 

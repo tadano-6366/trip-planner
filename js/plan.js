@@ -29,7 +29,7 @@ function renderHero() {
   $('#heroArt').innerHTML = trip.cover ? `<img src="${trip.cover}" alt="">` : defaultCover();
   $('#title').textContent = trip.title;
   $('#subtitle').textContent = trip.subtitle;
-  $('#stamp').innerHTML = `<div><small>Travel</small><span>🗾</span><strong>${esc(trip.destination || trip.title)}</strong></div>`;
+  $('#stamp').innerHTML = `<div><small>Travel</small><span>🌴</span><strong>${esc(trip.destination || trip.title)}</strong></div>`;
   if (!trip.destination) $('#stamp').innerHTML = `<div><small>Travel</small><span>✈️</span><strong>Bon voyage</strong></div>`;
 
   const n = trip.days.length;
@@ -76,8 +76,9 @@ function renderRoute() {
   const parts = [];
   trip.days.forEach((d, i) => {
     if (i) {
-      const move = d.activities.find((a) => a.type === 'train' || a.type === 'flight');
-      parts.push(`<div class="route-link" style="--i:${i}"><span>${move ? TYPES[move.type].icon : '🚶'}</span></div>`);
+      const first = d.activities[0];
+      const icon = first && (first.type === 'train' || first.type === 'flight') ? TYPES[first.type].icon : '🚗';
+      parts.push(`<div class="route-link" style="--i:${i}"><span>${icon}</span></div>`);
     }
     parts.push(`
       <button class="route-stop" data-day="${i}" style="--c:${dayColor(i)}">
@@ -147,7 +148,7 @@ function renderFood() {
   if (!trip.foods.length) { $('#food').hidden = true; return; }
   $('#foodRow').innerHTML = trip.foods.map((f, i) => `
     <figure class="polaroid taped" style="--r:${tilt(f.name + i)}" data-caption="${esc(f.name)}">
-      ${f.photo ? `<img src="${f.photo}" alt="${esc(f.name)}" loading="lazy">` : `<div class="ph">${['🍜', '🍲', '🍵', '🍙', '🍣', '🍡', '🥟', '🍢'][i % 8]}</div>`}
+      ${f.photo ? `<img src="${f.photo}" alt="${esc(f.name)}" loading="lazy">` : `<div class="ph">${['🍜', '🍲', '🍛', '🍧', '🍤', '🥘', '🍢', '🥥'][i % 8]}</div>`}
       <figcaption>${esc(f.name)}</figcaption>
       ${f.note ? `<p>${esc(f.note)}</p>` : ''}
     </figure>`).join('');

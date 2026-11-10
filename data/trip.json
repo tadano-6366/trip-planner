@@ -1,68 +1,63 @@
 {
-  "title": "Japan in Winter",
-  "subtitle": "Tokyo lights, Mt Fuji views & slow days in Kyoto",
-  "destination": "Japan",
-  "startDate": "2026-12-20",
-  "currency": "JPY",
+  "title": "Penang Makan Trip",
+  "subtitle": "Street art, hawker feasts & sunset jetties in George Town",
+  "destination": "Penang",
+  "startDate": "2026-12-19",
+  "currency": "MYR",
   "artStyle": "watercolor",
   "cover": "",
   "days": [
     {
-      "city": "Tokyo",
-      "title": "Arrive & old Tokyo",
+      "city": "George Town",
+      "title": "Heritage streets & hawker night",
       "activities": [
-        { "time": "10:30", "type": "flight", "name": "Land at Haneda Airport", "place": "Haneda Airport", "lat": 35.5494, "lng": 139.7798, "cost": 0, "note": "Get a Suica card at the station and top up ¥5,000." },
-        { "time": "13:00", "type": "sight", "name": "Senso-ji Temple", "place": "Asakusa", "lat": 35.7148, "lng": 139.7967, "cost": 0, "note": "Walk Nakamise street for snacks. Try ningyo-yaki cakes." },
-        { "time": "16:00", "type": "sight", "name": "Tokyo Skytree at sunset", "place": "Oshiage", "lat": 35.7101, "lng": 139.8107, "cost": 3100, "note": "Book a time slot online. On clear days you can see Mt Fuji." },
-        { "time": "19:00", "type": "food", "name": "Yakitori at Omoide Yokocho", "place": "Shinjuku", "lat": 35.6932, "lng": 139.6995, "cost": 4000, "note": "Tiny smoky alley bars. Bring cash." },
-        { "time": "22:00", "type": "hotel", "name": "Hotel in Shinjuku", "place": "Shinjuku", "lat": 35.6896, "lng": 139.7006, "cost": 18000, "note": "" }
+        { "time": "10:00", "type": "flight", "name": "Land at Penang Airport", "place": "Penang International Airport", "lat": 5.2971, "lng": 100.277, "cost": 0, "note": "Grab to George Town takes about 30 min (~RM30)." },
+        { "time": "12:00", "type": "food", "name": "Nasi kandar at Line Clear", "place": "Jalan Penang", "lat": 5.4187, "lng": 100.3337, "cost": 20, "note": "Ask for 'banjir' — all the curries poured over your rice." },
+        { "time": "13:30", "type": "sight", "name": "Street art hunt on Armenian Street", "place": "Armenian Street", "lat": 5.4146, "lng": 100.3375, "cost": 0, "note": "Find 'Kids on Bicycle' and the other murals. Go before 3pm, it gets hot." },
+        { "time": "15:00", "type": "sight", "name": "Cheong Fatt Tze Blue Mansion", "place": "Leith Street", "lat": 5.4213, "lng": 100.3355, "cost": 25, "note": "Guided tours at 11am, 2pm and 3.30pm." },
+        { "time": "16:30", "type": "sight", "name": "Khoo Kongsi clan house", "place": "Cannon Square", "lat": 5.4146, "lng": 100.3369, "cost": 15, "note": "Stunning carved and gilded hall." },
+        { "time": "18:30", "type": "sight", "name": "Sunset at Chew Jetty", "place": "Weld Quay", "lat": 5.4126, "lng": 100.3428, "cost": 0, "note": "Wooden stilt village over the sea — golden hour is magic." },
+        { "time": "20:00", "type": "food", "name": "Gurney Drive Hawker Centre", "place": "Gurney Drive", "lat": 5.438, "lng": 100.3096, "cost": 40, "note": "Char kway teow, oyster omelette, pasembur. Share lots of small plates!" },
+        { "time": "22:00", "type": "hotel", "name": "Heritage hotel in George Town", "place": "George Town", "lat": 5.417, "lng": 100.336, "cost": 300, "note": "" }
       ]
     },
     {
-      "city": "Kawaguchiko",
-      "title": "Mt Fuji day",
+      "city": "Air Itam",
+      "title": "Hills, temples & laksa",
       "activities": [
-        { "time": "08:00", "type": "train", "name": "Highway bus to Kawaguchiko", "place": "Busta Shinjuku", "lat": 35.6886, "lng": 139.7005, "cost": 2200, "note": "About 2 hours. Sit on the left for Fuji views." },
-        { "time": "11:00", "type": "sight", "name": "Chureito Pagoda", "place": "Arakurayama Sengen Park", "lat": 35.5013, "lng": 138.8013, "cost": 0, "note": "398 steps up — the classic pagoda + Fuji photo." },
-        { "time": "14:00", "type": "shop", "name": "The famous Fuji convenience store", "place": "Fujikawaguchiko", "lat": 35.5006, "lng": 138.7651, "cost": 800, "note": "Grab onigiri and hot milk tea. Please be quick & polite with photos." },
-        { "time": "15:30", "type": "nature", "name": "Oishi Park by the lake", "place": "Lake Kawaguchi", "lat": 35.5224, "lng": 138.7429, "cost": 0, "note": "Best Fuji reflection near sunset." },
-        { "time": "18:30", "type": "food", "name": "Hoto noodle dinner", "place": "Kawaguchiko", "lat": 35.4985, "lng": 138.7669, "cost": 1800, "note": "Thick noodles in miso pumpkin stew — perfect for winter." },
-        { "time": "20:00", "type": "hotel", "name": "Ryokan with onsen", "place": "Kawaguchiko", "lat": 35.513, "lng": 138.759, "cost": 32000, "note": "Ask for a room with a Fuji view." }
+        { "time": "08:30", "type": "nature", "name": "Funicular up Penang Hill", "place": "Penang Hill Lower Station", "lat": 5.4237, "lng": 100.2689, "cost": 30, "note": "Go early on a weekday to skip the queue. Cooler up top!" },
+        { "time": "11:30", "type": "food", "name": "Air Itam Assam Laksa", "place": "Air Itam Market", "lat": 5.3989, "lng": 100.2803, "cost": 10, "note": "Sour, spicy fish broth — Penang's most famous bowl." },
+        { "time": "13:00", "type": "sight", "name": "Kek Lok Si Temple", "place": "Air Itam", "lat": 5.3994, "lng": 100.2736, "cost": 10, "note": "Climb the pagoda and take the lift to the giant Guan Yin statue." },
+        { "time": "16:00", "type": "food", "name": "Penang Road famous cendol", "place": "Lebuh Keng Kwee", "lat": 5.4178, "lng": 100.3311, "cost": 5, "note": "Shaved ice, coconut milk, gula Melaka. Perfect for the heat." },
+        { "time": "19:30", "type": "food", "name": "Chulia Street night hawkers", "place": "Chulia Street", "lat": 5.4175, "lng": 100.3367, "cost": 30, "note": "Wonton mee and satay. Stalls open around 6pm." },
+        { "time": "22:00", "type": "hotel", "name": "Heritage hotel in George Town", "place": "George Town", "lat": 5.417, "lng": 100.336, "cost": 300, "note": "" }
       ]
     },
     {
-      "city": "Kyoto",
-      "title": "Shinkansen & red gates",
+      "city": "Batu Ferringhi",
+      "title": "Beach, butterflies & home",
       "activities": [
-        { "time": "09:00", "type": "train", "name": "Shinkansen to Kyoto", "place": "Mishima Station", "lat": 35.1265, "lng": 138.9109, "cost": 11000, "note": "Bus to Mishima, then Hikari to Kyoto (~2h)." },
-        { "time": "13:00", "type": "sight", "name": "Fushimi Inari Shrine", "place": "Fushimi", "lat": 34.9671, "lng": 135.7727, "cost": 0, "note": "Thousands of torii gates. Go up to Yotsutsuji viewpoint." },
-        { "time": "16:00", "type": "sight", "name": "Kiyomizu-dera", "place": "Higashiyama", "lat": 34.9949, "lng": 135.785, "cost": 500, "note": "Wander down Sannenzaka slope after." },
-        { "time": "19:00", "type": "food", "name": "Dinner in Pontocho", "place": "Pontocho Alley", "lat": 35.0037, "lng": 135.7708, "cost": 6000, "note": "Lantern-lit alley by the river." },
-        { "time": "21:30", "type": "hotel", "name": "Machiya guesthouse", "place": "Gion", "lat": 35.0037, "lng": 135.7752, "cost": 22000, "note": "" }
-      ]
-    },
-    {
-      "city": "Kyoto",
-      "title": "Bamboo, gold & home",
-      "activities": [
-        { "time": "07:30", "type": "nature", "name": "Arashiyama Bamboo Grove", "place": "Arashiyama", "lat": 35.017, "lng": 135.6718, "cost": 0, "note": "Go early before the crowds." },
-        { "time": "10:30", "type": "sight", "name": "Kinkaku-ji (Golden Pavilion)", "place": "Kita-ku", "lat": 35.0394, "lng": 135.7292, "cost": 500, "note": "" },
-        { "time": "13:00", "type": "food", "name": "Nishiki Market lunch crawl", "place": "Nishiki Market", "lat": 35.005, "lng": 135.7649, "cost": 3000, "note": "Tamagoyaki, soy milk donuts, matcha everything." },
-        { "time": "18:00", "type": "flight", "name": "Fly home from Kansai", "place": "Kansai International Airport", "lat": 34.432, "lng": 135.2304, "cost": 0, "note": "Haruka express from Kyoto Station (~75 min)." }
+        { "time": "09:00", "type": "nature", "name": "Penang National Park & Monkey Beach", "place": "Teluk Bahang", "lat": 5.4613, "lng": 100.206, "cost": 60, "note": "Hike in, boat back (~RM60 per boat, share it). Bring water." },
+        { "time": "13:00", "type": "food", "name": "Seafood lunch by the beach", "place": "Batu Ferringhi", "lat": 5.472, "lng": 100.247, "cost": 50, "note": "" },
+        { "time": "15:00", "type": "sight", "name": "Entopia butterfly farm", "place": "Teluk Bahang", "lat": 5.4471, "lng": 100.2153, "cost": 70, "note": "Indoor and outdoor gardens — great on a rainy afternoon too." },
+        { "time": "19:00", "type": "flight", "name": "Fly home", "place": "Penang International Airport", "lat": 5.2971, "lng": 100.277, "cost": 0, "note": "Leave Batu Ferringhi by 5pm — traffic can be slow." }
       ]
     }
   ],
   "foods": [
-    { "name": "Ramen", "note": "Tonkotsu in Tokyo", "photo": "" },
-    { "name": "Hoto noodles", "note": "Kawaguchiko winter warmer", "photo": "" },
-    { "name": "Matcha parfait", "note": "Kyoto must-try", "photo": "" },
-    { "name": "Konbini onigiri", "note": "Cheap, fast, delicious", "photo": "" }
+    { "name": "Char kway teow", "note": "Smoky wok-fried flat noodles", "photo": "" },
+    { "name": "Assam laksa", "note": "Sour & spicy fish noodle soup", "photo": "" },
+    { "name": "Nasi kandar", "note": "Rice flooded with curries", "photo": "" },
+    { "name": "Cendol", "note": "Icy coconut dessert", "photo": "" },
+    { "name": "Hokkien mee", "note": "Rich prawn broth noodles", "photo": "" },
+    { "name": "Roti canai", "note": "Flaky flatbread with dhal", "photo": "" }
   ],
   "tips": [
-    "Carry some cash — small shops and alley bars often don't take cards.",
-    "Winter is cold but clear: best season for Mt Fuji views.",
-    "Book Skytree and the ryokan early; December fills up fast.",
-    "Comfy shoes! You'll walk 15,000+ steps a day."
+    "Use the Grab app for rides — cheap and easy everywhere on the island.",
+    "Hot and humid with sudden rain: light clothes and a small umbrella.",
+    "Many hawker stalls close one day a week — check before you go.",
+    "Cover shoulders and knees when visiting temples and mosques.",
+    "Carry small cash; most hawkers don't take cards."
   ],
-  "packing": ["Passport", "Warm coat & gloves", "Comfy walking shoes", "Power bank", "Travel adapter (Type A)", "Coin purse", "Small towel for onsen"]
+  "packing": ["Passport / IC", "Light breathable clothes", "Small umbrella", "Sunscreen & hat", "Comfy sandals", "Mosquito repellent", "Power bank", "Small cash for hawkers"]
 }
