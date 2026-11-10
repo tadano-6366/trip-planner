@@ -8,10 +8,11 @@ Edit page: https://tadano-6366.github.io/trip-planner/edit.html
 - [x] Repo made public, GitHub Pages turned on (deploys from `main` / root)
 - [x] Plan page + edit page built, sample trip switched to Penang
 - [x] Photo art styles: Watercolor, Pencil sketch, Anime
+- [x] GitHub token created and **Publish to GitHub** tested — works (first publish: "Penang Trip", starts 18 Nov 2026)
 
 ## To do
 
-### 1. Create the GitHub token (to save edits from the app)
+### 1. GitHub token (done on the first device — keep for reference)
 Go to https://github.com/settings/personal-access-tokens/new
 
 | Setting | Value |
@@ -45,7 +46,7 @@ The token is saved only in that browser, so repeat this step on each new device.
 - [ ] Publish works and the change appears on the live site
 
 ### 4. Put in the real trip
-- [ ] Real start date and number of days (sample uses 19–21 Dec 2026)
+- [x] Real start date set (18 Nov 2026) — check the number of days is right
 - [ ] Replace sample activities with your own plan (use **🔍 Find** to put places on the map)
 - [ ] Add a cover photo and food photos
 - [ ] Update tips and packing list
