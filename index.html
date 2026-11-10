@@ -1,0 +1,81 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#f5efe3">
+  <title>Trip Plan</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@500;700&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="vendor/leaflet.css">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <header class="hero" id="hero">
+    <div class="hero-art" id="heroArt"></div>
+    <div class="top-actions"><a class="btn small" href="edit.html">✎ Edit plan</a></div>
+    <div class="stamp" id="stamp"></div>
+    <div class="hero-text">
+      <h1 id="title"></h1>
+      <p class="subtitle" id="subtitle"></p>
+      <div class="meta"><span class="pill" id="dates"></span><span class="pill accent" id="countdown"></span></div>
+    </div>
+  </header>
+
+  <div id="banner"></div>
+  <nav class="daybar" id="daybar" aria-label="Days"></nav>
+
+  <main class="layout">
+    <div class="content">
+      <section id="route" class="reveal">
+        <h2 class="label"><b>1</b>The route</h2>
+        <div class="card taped"><div class="route-strip" id="routeStrip"></div></div>
+      </section>
+      <section id="itinerary">
+        <h2 class="label"><b>2</b>Day by day</h2>
+        <div id="days"></div>
+      </section>
+      <section id="food" class="reveal">
+        <h2 class="label"><b>3</b>Must-eat</h2>
+        <div class="food-row" id="foodRow"></div>
+      </section>
+      <section id="tips" class="reveal">
+        <h2 class="label"><b>4</b>Good to know</h2>
+        <div class="notebook"><ol id="tipList"></ol></div>
+      </section>
+      <section id="packing" class="reveal">
+        <h2 class="label"><b>5</b>Packing list</h2>
+        <div class="card">
+          <div class="pack-head"><div class="progress"><i id="packBar"></i></div><b id="packCount"></b></div>
+          <ul class="pack-list" id="packList"></ul>
+        </div>
+      </section>
+      <section id="budget" class="reveal">
+        <h2 class="label"><b>6</b>Budget</h2>
+        <div class="card budget" id="budgetBox"></div>
+      </section>
+      <footer class="footer">
+        <p>Enjoy every moment ♡</p>
+        <a class="btn" href="edit.html">✎ Edit this plan</a>
+      </footer>
+    </div>
+
+    <aside class="map-wrap" id="mapWrap" aria-label="Map">
+      <div class="sheet-handle"></div>
+      <div class="sheet-top">
+        <div class="map-filter" id="mapFilter"></div>
+        <button class="sheet-close" id="mapClose" aria-label="Close map">✕</button>
+      </div>
+      <div id="map"></div>
+    </aside>
+  </main>
+
+  <div class="backdrop" id="backdrop"></div>
+  <button class="fab-map" id="fabMap">🗺️ Map</button>
+  <div class="lightbox" id="lightbox"><figure><img alt=""><figcaption></figcaption></figure></div>
+
+  <script src="vendor/leaflet.js"></script>
+  <script type="module" src="js/plan.js"></script>
+</body>
+</html>
