@@ -1,56 +1,242 @@
 {
-  "title": "Penang Makan Trip",
+  "title": "Penang Trip",
   "subtitle": "Street art, hawker feasts & sunset jetties in George Town",
   "destination": "Penang",
-  "startDate": "2026-12-19",
+  "startDate": "2026-11-18",
   "currency": "MYR",
-  "artStyle": "watercolor",
+  "artStyle": "anime",
   "cover": "",
   "days": [
     {
       "city": "George Town",
       "title": "Heritage streets & hawker night",
       "activities": [
-        { "time": "10:00", "type": "flight", "name": "Land at Penang Airport", "place": "Penang International Airport", "lat": 5.2971, "lng": 100.277, "cost": 0, "note": "Grab to George Town takes about 30 min (~RM30)." },
-        { "time": "12:00", "type": "food", "name": "Nasi kandar at Line Clear", "place": "Jalan Penang", "lat": 5.4187, "lng": 100.3337, "cost": 20, "note": "Ask for 'banjir' — all the curries poured over your rice." },
-        { "time": "13:30", "type": "sight", "name": "Street art hunt on Armenian Street", "place": "Armenian Street", "lat": 5.4146, "lng": 100.3375, "cost": 0, "note": "Find 'Kids on Bicycle' and the other murals. Go before 3pm, it gets hot." },
-        { "time": "15:00", "type": "sight", "name": "Cheong Fatt Tze Blue Mansion", "place": "Leith Street", "lat": 5.4213, "lng": 100.3355, "cost": 25, "note": "Guided tours at 11am, 2pm and 3.30pm." },
-        { "time": "16:30", "type": "sight", "name": "Khoo Kongsi clan house", "place": "Cannon Square", "lat": 5.4146, "lng": 100.3369, "cost": 15, "note": "Stunning carved and gilded hall." },
-        { "time": "18:30", "type": "sight", "name": "Sunset at Chew Jetty", "place": "Weld Quay", "lat": 5.4126, "lng": 100.3428, "cost": 0, "note": "Wooden stilt village over the sea — golden hour is magic." },
-        { "time": "20:00", "type": "food", "name": "Gurney Drive Hawker Centre", "place": "Gurney Drive", "lat": 5.438, "lng": 100.3096, "cost": 40, "note": "Char kway teow, oyster omelette, pasembur. Share lots of small plates!" },
-        { "time": "22:00", "type": "hotel", "name": "Heritage hotel in George Town", "place": "George Town", "lat": 5.417, "lng": 100.336, "cost": 300, "note": "" }
+        {
+          "time": "10:00",
+          "type": "train",
+          "name": "Land at Penang Airport",
+          "place": "Penang International Airport",
+          "lat": 5.2971,
+          "lng": 100.277,
+          "cost": 0,
+          "note": "Grab to George Town takes about 30 min (~RM30)."
+        },
+        {
+          "time": "12:00",
+          "type": "food",
+          "name": "Nasi kandar at Line Clear",
+          "place": "Jalan Penang",
+          "lat": 5.4187,
+          "lng": 100.3337,
+          "cost": 20,
+          "note": "Ask for 'banjir' — all the curries poured over your rice."
+        },
+        {
+          "time": "13:30",
+          "type": "sight",
+          "name": "Street art hunt on Armenian Street",
+          "place": "Armenian Street",
+          "lat": 5.4157748,
+          "lng": 100.3364302,
+          "cost": 0,
+          "note": "Find 'Kids on Bicycle' and the other murals. Go before 3pm, it gets hot."
+        },
+        {
+          "time": "15:00",
+          "type": "sight",
+          "name": "Cheong Fatt Tze Blue Mansion",
+          "place": "Leith Street",
+          "lat": 5.4213,
+          "lng": 100.3355,
+          "cost": 25,
+          "note": "Guided tours at 11am, 2pm and 3.30pm."
+        },
+        {
+          "time": "16:30",
+          "type": "sight",
+          "name": "Khoo Kongsi clan house",
+          "place": "Cannon Square",
+          "lat": 5.4146,
+          "lng": 100.3369,
+          "cost": 15,
+          "note": "Stunning carved and gilded hall."
+        },
+        {
+          "time": "18:30",
+          "type": "sight",
+          "name": "Sunset at Chew Jetty",
+          "place": "Weld Quay",
+          "lat": 5.4126,
+          "lng": 100.3428,
+          "cost": 0,
+          "note": "Wooden stilt village over the sea — golden hour is magic."
+        },
+        {
+          "time": "20:00",
+          "type": "food",
+          "name": "Gurney Drive Hawker Centre",
+          "place": "Gurney Drive",
+          "lat": 5.438,
+          "lng": 100.3096,
+          "cost": 40,
+          "note": "Char kway teow, oyster omelette, pasembur. Share lots of small plates!"
+        },
+        {
+          "time": "22:00",
+          "type": "hotel",
+          "name": "Heritage hotel in George Town",
+          "place": "George Town",
+          "lat": 5.417,
+          "lng": 100.336,
+          "cost": 300,
+          "note": ""
+        }
       ]
     },
     {
       "city": "Air Itam",
       "title": "Hills, temples & laksa",
       "activities": [
-        { "time": "08:30", "type": "nature", "name": "Funicular up Penang Hill", "place": "Penang Hill Lower Station", "lat": 5.4237, "lng": 100.2689, "cost": 30, "note": "Go early on a weekday to skip the queue. Cooler up top!" },
-        { "time": "11:30", "type": "food", "name": "Air Itam Assam Laksa", "place": "Air Itam Market", "lat": 5.3989, "lng": 100.2803, "cost": 10, "note": "Sour, spicy fish broth — Penang's most famous bowl." },
-        { "time": "13:00", "type": "sight", "name": "Kek Lok Si Temple", "place": "Air Itam", "lat": 5.3994, "lng": 100.2736, "cost": 10, "note": "Climb the pagoda and take the lift to the giant Guan Yin statue." },
-        { "time": "16:00", "type": "food", "name": "Penang Road famous cendol", "place": "Lebuh Keng Kwee", "lat": 5.4178, "lng": 100.3311, "cost": 5, "note": "Shaved ice, coconut milk, gula Melaka. Perfect for the heat." },
-        { "time": "19:30", "type": "food", "name": "Chulia Street night hawkers", "place": "Chulia Street", "lat": 5.4175, "lng": 100.3367, "cost": 30, "note": "Wonton mee and satay. Stalls open around 6pm." },
-        { "time": "22:00", "type": "hotel", "name": "Heritage hotel in George Town", "place": "George Town", "lat": 5.417, "lng": 100.336, "cost": 300, "note": "" }
+        {
+          "time": "08:30",
+          "type": "nature",
+          "name": "Funicular up Penang Hill",
+          "place": "Penang Hill Lower Station",
+          "lat": 5.4237,
+          "lng": 100.2689,
+          "cost": 30,
+          "note": "Go early on a weekday to skip the queue. Cooler up top!"
+        },
+        {
+          "time": "11:30",
+          "type": "food",
+          "name": "Air Itam Assam Laksa",
+          "place": "Air Itam Market",
+          "lat": 5.3989,
+          "lng": 100.2803,
+          "cost": 10,
+          "note": "Sour, spicy fish broth — Penang's most famous bowl."
+        },
+        {
+          "time": "13:00",
+          "type": "sight",
+          "name": "Kek Lok Si Temple",
+          "place": "Air Itam",
+          "lat": 5.3994,
+          "lng": 100.2736,
+          "cost": 10,
+          "note": "Climb the pagoda and take the lift to the giant Guan Yin statue."
+        },
+        {
+          "time": "16:00",
+          "type": "food",
+          "name": "Penang Road famous cendol",
+          "place": "Lebuh Keng Kwee",
+          "lat": 5.4178,
+          "lng": 100.3311,
+          "cost": 5,
+          "note": "Shaved ice, coconut milk, gula Melaka. Perfect for the heat."
+        },
+        {
+          "time": "19:30",
+          "type": "food",
+          "name": "Chulia Street night hawkers",
+          "place": "Chulia Street",
+          "lat": 5.4175,
+          "lng": 100.3367,
+          "cost": 30,
+          "note": "Wonton mee and satay. Stalls open around 6pm."
+        },
+        {
+          "time": "22:00",
+          "type": "hotel",
+          "name": "Heritage hotel in George Town",
+          "place": "George Town",
+          "lat": 5.417,
+          "lng": 100.336,
+          "cost": 300,
+          "note": ""
+        }
       ]
     },
     {
       "city": "Batu Ferringhi",
       "title": "Beach, butterflies & home",
       "activities": [
-        { "time": "09:00", "type": "nature", "name": "Penang National Park & Monkey Beach", "place": "Teluk Bahang", "lat": 5.4613, "lng": 100.206, "cost": 60, "note": "Hike in, boat back (~RM60 per boat, share it). Bring water." },
-        { "time": "13:00", "type": "food", "name": "Seafood lunch by the beach", "place": "Batu Ferringhi", "lat": 5.472, "lng": 100.247, "cost": 50, "note": "" },
-        { "time": "15:00", "type": "sight", "name": "Entopia butterfly farm", "place": "Teluk Bahang", "lat": 5.4471, "lng": 100.2153, "cost": 70, "note": "Indoor and outdoor gardens — great on a rainy afternoon too." },
-        { "time": "19:00", "type": "flight", "name": "Fly home", "place": "Penang International Airport", "lat": 5.2971, "lng": 100.277, "cost": 0, "note": "Leave Batu Ferringhi by 5pm — traffic can be slow." }
+        {
+          "time": "09:00",
+          "type": "nature",
+          "name": "Penang National Park & Monkey Beach",
+          "place": "Teluk Bahang",
+          "lat": 5.4613,
+          "lng": 100.206,
+          "cost": 60,
+          "note": "Hike in, boat back (~RM60 per boat, share it). Bring water."
+        },
+        {
+          "time": "13:00",
+          "type": "food",
+          "name": "Seafood lunch by the beach",
+          "place": "Batu Ferringhi",
+          "lat": 5.472,
+          "lng": 100.247,
+          "cost": 50,
+          "note": ""
+        },
+        {
+          "time": "15:00",
+          "type": "sight",
+          "name": "Entopia butterfly farm",
+          "place": "Teluk Bahang",
+          "lat": 5.4471,
+          "lng": 100.2153,
+          "cost": 70,
+          "note": "Indoor and outdoor gardens — great on a rainy afternoon too."
+        },
+        {
+          "time": "19:00",
+          "type": "flight",
+          "name": "Fly home",
+          "place": "Penang International Airport",
+          "lat": 5.2971,
+          "lng": 100.277,
+          "cost": 0,
+          "note": "Leave Batu Ferringhi by 5pm — traffic can be slow."
+        }
       ]
     }
   ],
   "foods": [
-    { "name": "Char kway teow", "note": "Smoky wok-fried flat noodles", "photo": "" },
-    { "name": "Assam laksa", "note": "Sour & spicy fish noodle soup", "photo": "" },
-    { "name": "Nasi kandar", "note": "Rice flooded with curries", "photo": "" },
-    { "name": "Cendol", "note": "Icy coconut dessert", "photo": "" },
-    { "name": "Hokkien mee", "note": "Rich prawn broth noodles", "photo": "" },
-    { "name": "Roti canai", "note": "Flaky flatbread with dhal", "photo": "" }
+    {
+      "name": "Char kway teow",
+      "note": "Smoky wok-fried flat noodles",
+      "photo": ""
+    },
+    {
+      "name": "Assam laksa",
+      "note": "Sour & spicy fish noodle soup",
+      "photo": ""
+    },
+    {
+      "name": "Nasi kandar",
+      "note": "Rice flooded with curries",
+      "photo": ""
+    },
+    {
+      "name": "Cendol",
+      "note": "Icy coconut dessert",
+      "photo": ""
+    },
+    {
+      "name": "Hokkien mee",
+      "note": "Rich prawn broth noodles",
+      "photo": ""
+    },
+    {
+      "name": "Roti canai",
+      "note": "Flaky flatbread with dhal",
+      "photo": ""
+    }
   ],
   "tips": [
     "Use the Grab app for rides — cheap and easy everywhere on the island.",
@@ -59,5 +245,14 @@
     "Cover shoulders and knees when visiting temples and mosques.",
     "Carry small cash; most hawkers don't take cards."
   ],
-  "packing": ["Passport / IC", "Light breathable clothes", "Small umbrella", "Sunscreen & hat", "Comfy sandals", "Mosquito repellent", "Power bank", "Small cash for hawkers"]
+  "packing": [
+    "Passport / IC",
+    "Light breathable clothes",
+    "Small umbrella",
+    "Sunscreen & hat",
+    "Comfy sandals",
+    "Mosquito repellent",
+    "Power bank",
+    "Small cash for hawkers"
+  ]
 }
