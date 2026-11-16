@@ -282,18 +282,47 @@ function initMap() {
   };
 }
 
-// Map images come from OpenStreetMap (free, no API key). If this device or network
-// can't load them, show a notice instead of a blank map; pins and routes still work.
-// (CARTO tiles were dropped: they now return "API key required" images.)
+// Map background. First choice: OpenFreeMap vector map (free, no API key, drawn with
+// WebGL so it stays sharp on Retina/phone screens). If WebGL or the style can't load,
+// fall back to OpenStreetMap picture tiles; if those fail too, show a notice.
+function osmAttr() {
+  return '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors';
+}
+
 function addTiles(map) {
+  if (!window.maplibregl || !L.maplibreGL || !hasWebGL()) return addRasterTiles(map);
+  let done = false;
+  const vector = L.maplibreGL({
+    style: 'https://tiles.openfreemap.org/styles/liberty',
+    attribution: `<a href="https://openfreemap.org" target="_blank" rel="noopener">OpenFreeMap</a> ${osmAttr()}`,
+  }).addTo(map);
+  const fallBack = () => {
+    if (done) return;
+    done = true;
+    map.removeLayer(vector);
+    addRasterTiles(map);
+  };
+  // The vector engine is only created once the Leaflet map has a view.
+  map.whenReady(() => {
+    const gl = vector.getMaplibreMap();
+    if (!gl) return fallBack();
+    gl.once('load', () => { done = true; });
+    gl.on('error', () => { if (!done) fallBack(); });
+    setTimeout(() => { if (!done && !gl.isStyleLoaded()) fallBack(); }, 8000);
+  });
+}
+
+function addRasterTiles(map) {
   let loaded = 0, failed = 0;
-  L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
-    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
-    maxZoom: 19,
-  })
+  L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', { attribution: osmAttr(), maxZoom: 19 })
     .on('tileload', () => { loaded++; })
     .on('tileerror', () => { if (!loaded && ++failed >= 4) showMapNotice(map); })
     .addTo(map);
+}
+
+function hasWebGL() {
+  try { const c = document.createElement('canvas'); return !!(c.getContext('webgl2') || c.getContext('webgl')); }
+  catch { return false; }
 }
 
 function showMapNotice(map) {

@@ -22,4 +22,4 @@ Then open http://localhost:8000.
 Repo **Settings → Pages → Deploy from branch → `main` / root**.
 
 ## Tech
-Plain HTML, CSS and JavaScript (ES modules, no build step). Bundled in `vendor/`: [Leaflet](https://leafletjs.com) 1.9.4 for maps, [SortableJS](https://sortablejs.github.io/Sortable/) 1.15.2 for drag-and-drop. Map tiles © OpenStreetMap contributors (no API key needed). Place search via OpenStreetMap Nominatim, with Photon as a backup.
+Plain HTML, CSS and JavaScript (ES modules, no build step). Bundled in `vendor/`: [Leaflet](https://leafletjs.com) 1.9.4 for maps, [SortableJS](https://sortablejs.github.io/Sortable/) 1.15.2 for drag-and-drop. Map: [OpenFreeMap](https://openfreemap.org) vector tiles via [MapLibre GL](https://maplibre.org) 4.7.1 (sharp on Retina screens, no API key), falling back to OpenStreetMap tiles. Map data © OpenStreetMap contributors. Place search via OpenStreetMap Nominatim, with Photon as a backup.
