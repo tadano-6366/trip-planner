@@ -124,8 +124,14 @@ function renderDays() {
 // Opens Waze with directions to this stop: the app on phones, waze.com on computers.
 function wazeLink(a) {
   const url = `https://waze.com/ul?ll=${Number(a.lat)},${Number(a.lng)}&navigate=yes`;
-  return `<a class="chip waze-btn" href="${url}" target="_blank" rel="noopener" title="Navigate with Waze" aria-label="Navigate to ${esc(a.name)} with Waze">
-    <svg viewBox="0 0 24 24" width="14" height="14" aria-hidden="true"><path fill="currentColor" d="M5 11l1.5-4.2A2 2 0 0 1 8.4 5.5h7.2a2 2 0 0 1 1.9 1.3L19 11a2 2 0 0 1 1 1.7V17a1 1 0 0 1-1 1h-1a1 1 0 0 1-1-1v-1H7v1a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1v-4.3A2 2 0 0 1 5 11zm2.1-.5h9.8l-1-2.9a.5.5 0 0 0-.5-.3H8.6a.5.5 0 0 0-.5.3zM7 14.5a1.2 1.2 0 1 0 0-2.4 1.2 1.2 0 0 0 0 2.4zm10 0a1.2 1.2 0 1 0 0-2.4 1.2 1.2 0 0 0 0 2.4z"/></svg>Waze</a>`;
+  return `<a class="waze-btn" href="${url}" target="_blank" rel="noopener" title="Navigate with Waze" aria-label="Navigate to ${esc(a.name)} with Waze">
+    <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true">
+      <rect x="11" y="11" width="2.4" height="11" rx="1.2" fill="#6b4f3a"/>
+      <circle cx="12.2" cy="8.5" r="6.5" fill="#e0453a"/>
+      <path d="M12.2 8.5 m-4 0 a4 4 0 0 1 4-4" fill="none" stroke="#fff" stroke-width="1.4" stroke-linecap="round" opacity=".9"/>
+      <path d="M8.6 8.5 a3.6 3.6 0 0 0 6.6 2" fill="none" stroke="#b52f26" stroke-width="1.2" stroke-linecap="round"/>
+      <circle cx="10" cy="6.2" r="1.1" fill="#fff" opacity=".85"/>
+    </svg></a>`;
 }
 
 function actCard(a, d, j) {

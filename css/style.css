@@ -215,17 +215,20 @@ a { color: var(--green); }
   display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
 }
 .act.open .note { -webkit-line-clamp: unset; }
-.act-foot { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 10px; }
+.act-foot { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; margin-top: 10px; }
 .chip {
   display: inline-flex; align-items: center; gap: 4px; border: 0; border-radius: 999px; padding: 3px 10px;
   font-size: 12px; font-weight: 700; background: var(--paper); color: var(--ink);
 }
 .chip.cost { background: color-mix(in srgb, var(--c) 14%, white); color: var(--c); }
 .chip.map-btn { background: var(--ink); color: #fff; }
-.chip.waze-btn { background: #33ccff; color: #0b2a3a; text-decoration: none; transition: transform .15s; }
-.chip.waze-btn:hover { transform: translateY(-1px); }
+.waze-btn {
+  display: inline-grid; place-items: center; width: 30px; height: 30px; border-radius: 50%;
+  background: #fdeceb; text-decoration: none; transition: transform .25s cubic-bezier(.3,1.6,.5,1);
+}
+.waze-btn:hover { transform: rotate(-12deg) scale(1.12); }
+.waze-btn:active { transform: scale(.92); }
 .popup-actions { margin-top: 8px; }
-.popup-actions .chip.waze-btn { color: #0b2a3a; }
 .act .polaroid { width: 104px; flex: none; padding: 5px 5px 8px; }
 .act .polaroid:hover { transform: rotate(0) scale(1.06); }
 
