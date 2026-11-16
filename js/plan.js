@@ -113,11 +113,19 @@ function renderDays() {
   $('#days').addEventListener('click', (e) => {
     const mapBtn = e.target.closest('.map-btn');
     if (mapBtn) { e.stopPropagation(); mapApi.focus(+mapBtn.dataset.d, +mapBtn.dataset.a); return; }
+    if (e.target.closest('.waze-btn')) return; // let the link open Waze without toggling the card
     const pic = e.target.closest('.polaroid');
     if (pic) { e.stopPropagation(); openLightbox(pic.querySelector('img').src, pic.dataset.caption); return; }
     const card = e.target.closest('.act');
     if (card) card.classList.toggle('open');
   });
+}
+
+// Opens Waze with directions to this stop: the app on phones, waze.com on computers.
+function wazeLink(a) {
+  const url = `https://waze.com/ul?ll=${Number(a.lat)},${Number(a.lng)}&navigate=yes`;
+  return `<a class="chip waze-btn" href="${url}" target="_blank" rel="noopener" title="Navigate with Waze" aria-label="Navigate to ${esc(a.name)} with Waze">
+    <svg viewBox="0 0 24 24" width="14" height="14" aria-hidden="true"><path fill="currentColor" d="M5 11l1.5-4.2A2 2 0 0 1 8.4 5.5h7.2a2 2 0 0 1 1.9 1.3L19 11a2 2 0 0 1 1 1.7V17a1 1 0 0 1-1 1h-1a1 1 0 0 1-1-1v-1H7v1a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1v-4.3A2 2 0 0 1 5 11zm2.1-.5h9.8l-1-2.9a.5.5 0 0 0-.5-.3H8.6a.5.5 0 0 0-.5.3zM7 14.5a1.2 1.2 0 1 0 0-2.4 1.2 1.2 0 0 0 0 2.4zm10 0a1.2 1.2 0 1 0 0-2.4 1.2 1.2 0 0 0 0 2.4z"/></svg>Waze</a>`;
 }
 
 function actCard(a, d, j) {
@@ -135,7 +143,7 @@ function actCard(a, d, j) {
         <div class="act-foot">
           <span class="chip">${t.icon} ${t.label}</span>
           ${a.cost ? `<span class="chip cost">${money(a.cost)}</span>` : ''}
-          ${hasGeo ? `<button class="chip map-btn" data-d="${d}" data-a="${j}">🗺️ Map</button>` : ''}
+          ${hasGeo ? `<button class="chip map-btn" data-d="${d}" data-a="${j}">🗺️ Map</button>${wazeLink(a)}` : ''}
         </div>
       </div>
       ${a.photo ? `<figure class="polaroid" style="--r:${tilt(a.name + j)}" data-caption="${esc(a.name)}"><img src="${a.photo}" alt="${esc(a.name)}" loading="lazy"></figure>` : ''}
@@ -231,7 +239,7 @@ function initMap() {
       pts.push(ll);
       const m = L.marker(ll, {
         icon: L.divIcon({ className: '', html: `<div class="map-pin" style="--c:${c}"><span>${j + 1}</span></div>`, iconSize: [30, 30], iconAnchor: [15, 30], popupAnchor: [0, -28] }),
-      }).bindPopup(`<b>${esc(a.name)}</b><br><small>Day ${i + 1}${a.time ? ' · ' + esc(a.time) : ''}${a.place ? ' · ' + esc(a.place) : ''}</small>`);
+      }).bindPopup(`<b>${esc(a.name)}</b><br><small>Day ${i + 1}${a.time ? ' · ' + esc(a.time) : ''}${a.place ? ' · ' + esc(a.place) : ''}</small><div class="popup-actions">${wazeLink(a)}</div>`);
       m.on('click', () => flash(i, j));
       m.addTo(g);
       markers[i][j] = m;

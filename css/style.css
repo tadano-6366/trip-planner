@@ -222,6 +222,10 @@ a { color: var(--green); }
 }
 .chip.cost { background: color-mix(in srgb, var(--c) 14%, white); color: var(--c); }
 .chip.map-btn { background: var(--ink); color: #fff; }
+.chip.waze-btn { background: #33ccff; color: #0b2a3a; text-decoration: none; transition: transform .15s; }
+.chip.waze-btn:hover { transform: translateY(-1px); }
+.popup-actions { margin-top: 8px; }
+.popup-actions .chip.waze-btn { color: #0b2a3a; }
 .act .polaroid { width: 104px; flex: none; padding: 5px 5px 8px; }
 .act .polaroid:hover { transform: rotate(0) scale(1.06); }
 
