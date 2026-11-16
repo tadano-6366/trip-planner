@@ -16,6 +16,8 @@ export const TYPES = {
   other:  { icon: '📍', label: 'Other', color: '#8a8273' },
 };
 
+export const WEEKDAYS = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+
 export const DAY_COLORS = ['#c4553b', '#3d5a8a', '#2f6d55', '#b8862f', '#7a5a9a', '#2f8a83', '#a3476f', '#5d6f2f'];
 export const dayColor = (i) => DAY_COLORS[i % DAY_COLORS.length];
 
@@ -44,6 +46,7 @@ export function normalize(t) {
   t.destination ??= '';
   t.currency ??= 'USD';
   t.artStyle ??= 'watercolor';
+  t.mapStyle ??= 'soft';
   t.days ??= [];
   t.days.forEach((d) => { d.activities ??= []; });
   t.foods ??= [];

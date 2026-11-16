@@ -53,11 +53,21 @@ The token is saved only in that browser, so repeat this step on each new device.
 - [ ] Update tips and packing list
 - [ ] Keep private details (booking numbers, passport info) out — the repo is public
 
-### 5. Ideas for later (discuss with Claude)
+### 5. Added 16 Nov
+- [x] **Today view**: days are folded; on a trip day that day opens and a "Now / Next" card shows at the top
+  (preview any moment with `index.html?now=2026-11-19T12:40`)
+- [x] **Weather** (Open-Meteo, free): per day on the plan, rain chance per stop, and a rain-by-hour chart in the editor
+- [x] **Closed-day warnings**: set "Closed on" days per stop in the editor
+- [x] **Night mode** toggle (🌙/☀️) on both pages
+- [x] **Map colours**: Soft or Standard — switch in the editor under Trip → Map colours
+- [x] Waze button (red lollipop) on each stop
+
+### 6. Ideas for later (discuss with Claude)
+- [ ] Works offline / add to home screen
+- [ ] Tick off stops as you go; spending tracker; Grab button
+- [ ] Store photos as separate files so the page loads faster
 - [ ] Style tweaks: colours, fonts, sections to add or remove
 - [ ] True AI anime/illustration photos (needs an AI image service + API key; has a cost)
-- [ ] Weather forecast per day
-- [ ] Install to phone home screen / work offline
 - [ ] Share link for travel companions; multiple trips
 
 ## Continuing with Claude on another device

@@ -1,16 +1,30 @@
-import { loadTrip, TYPES, dayColor, dayDate, parseDate, fmtDate, fmtMoney, esc, tilt, packedState, savePackedState } from './store.js';
+import { loadTrip, TYPES, dayColor, dayDate, parseDate, fmtDate, fmtMoney, esc, tilt, packedState, savePackedState, WEEKDAYS } from './store.js';
 import { defaultCover } from './art.js';
+import { dayForecast, dayLabel, rainAt, describe, OUTDOOR } from './weather.js';
+import { initThemeToggle, currentTheme } from './theme.js';
+import { mapStyle } from './mapstyle.js';
 
 const $ = (s) => document.querySelector(s);
 const { trip, source } = await loadTrip();
 const money = (n) => fmtMoney(n, trip.currency);
 const isDesktop = () => matchMedia('(min-width: 1000px)').matches;
 
+// "Now" can be faked for previewing trip days: index.html?now=2026-11-19T12:40
+const NOW_OVERRIDE = new URLSearchParams(location.search).get('now');
+const now = () => (NOW_OVERRIDE ? new Date(NOW_OVERRIDE) : new Date());
+const sameDay = (a, b) => a && b && a.toDateString() === b.toDateString();
+const todayIdx = () => trip.days.findIndex((_, i) => sameDay(dayDate(trip, i), now()));
+const minutes = (hhmm) => { const [h, m] = (hhmm || '').split(':').map(Number); return h * 60 + (m || 0); };
+const hasGeo = (a) => a.lat != null && a.lng != null && a.lat !== '';
+const closedToday = (a, d) => { const dt = dayDate(trip, d); return dt && (a.closed || []).includes(dt.getDay()); };
+
 document.title = `${trip.title} · Trip Plan`;
+initThemeToggle($('#themeToggle'));
 renderHero();
 renderDaybar();
 renderRoute();
 renderDays();
+renderToday();
 renderFood();
 renderTips();
 renderPacking();
@@ -19,6 +33,8 @@ const mapApi = initMap();
 initReveal();
 initScrollSpy();
 initLightbox();
+loadWeather();
+setInterval(renderToday, 60e3);
 
 if (source === 'local') {
   $('#banner').innerHTML = `<div class="local-banner">✏️ You're seeing your unpublished edits on this device. <a href="edit.html#publish">Publish</a> so others see them too.</div>`;
@@ -29,8 +45,9 @@ function renderHero() {
   $('#heroArt').innerHTML = trip.cover ? `<img src="${trip.cover}" alt="">` : defaultCover();
   $('#title').textContent = trip.title;
   $('#subtitle').textContent = trip.subtitle;
-  $('#stamp').innerHTML = `<div><small>Travel</small><span>🌴</span><strong>${esc(trip.destination || trip.title)}</strong></div>`;
-  if (!trip.destination) $('#stamp').innerHTML = `<div><small>Travel</small><span>✈️</span><strong>Bon voyage</strong></div>`;
+  $('#stamp').innerHTML = trip.destination
+    ? `<div><small>Travel</small><span>🌴</span><strong>${esc(trip.destination)}</strong></div>`
+    : `<div><small>Travel</small><span>✈️</span><strong>Bon voyage</strong></div>`;
 
   const n = trip.days.length;
   const first = dayDate(trip, 0), last = dayDate(trip, Math.max(0, n - 1));
@@ -41,11 +58,11 @@ function renderHero() {
   const cd = $('#countdown');
   const start = parseDate(trip.startDate);
   if (!start) { cd.remove(); return; }
-  const today = new Date(); today.setHours(0, 0, 0, 0);
+  const today = now(); today.setHours(0, 0, 0, 0);
   const diff = Math.round((start - today) / 864e5);
   if (diff > 0) {
-    cd.innerHTML = `✈️ <span><span id="cdNum">0</span> days to go</span>`;
-    countUp($('#cdNum'), diff);
+    cd.innerHTML = diff === 1 ? '✈️ Tomorrow!' : `✈️ <span><span id="cdNum">0</span> days to go</span>`;
+    if (diff > 1) countUp($('#cdNum'), diff);
   } else if (-diff < n) cd.textContent = `🌸 Day ${-diff + 1} of ${n} — enjoy!`;
   else cd.textContent = '📔 Trip memories';
 }
@@ -61,14 +78,20 @@ function countUp(el, to) {
 }
 
 /* ---------- day bar + route ---------- */
+function goToDay(i) {
+  openDay(i, true);
+  document.getElementById(`day-${i}`).scrollIntoView({ behavior: 'smooth' });
+}
+
 function renderDaybar() {
+  const t = todayIdx();
   $('#daybar').innerHTML = trip.days.map((d, i) => `
     <button data-day="${i}" style="--c:${dayColor(i)}">
-      <span class="tape-chip">Day ${i + 1}</span><small>${esc(d.city || '')}</small>
+      <span class="tape-chip">Day ${i + 1}</span><small>${i === t ? '⭐ Today' : esc(d.city || '')}</small>
     </button>`).join('');
   $('#daybar').addEventListener('click', (e) => {
     const b = e.target.closest('[data-day]');
-    if (b) document.getElementById(`day-${b.dataset.day}`).scrollIntoView({ behavior: 'smooth' });
+    if (b) goToDay(+b.dataset.day);
   });
 }
 
@@ -89,28 +112,47 @@ function renderRoute() {
   $('#routeStrip').innerHTML = parts.join('');
   $('#routeStrip').addEventListener('click', (e) => {
     const b = e.target.closest('[data-day]');
-    if (b) document.getElementById(`day-${b.dataset.day}`).scrollIntoView({ behavior: 'smooth' });
+    if (b) goToDay(+b.dataset.day);
   });
 }
 
-/* ---------- itinerary ---------- */
+/* ---------- itinerary (days folded; today open) ---------- */
 function renderDays() {
+  const t = todayIdx();
+  const today = now(); today.setHours(0, 0, 0, 0);
   $('#days').innerHTML = trip.days.map((d, i) => {
     const total = d.activities.reduce((s, a) => s + (Number(a.cost) || 0), 0);
+    const date = dayDate(trip, i);
+    const past = date && date < today;
+    const open = i === t;
+    const closedCount = d.activities.filter((a) => closedToday(a, i)).length;
     return `
-    <section class="day" id="day-${i}" data-day="${i}" style="--c:${dayColor(i)}">
-      <header class="day-head reveal">
+    <section class="day ${open ? '' : 'folded'} ${past ? 'past' : ''} ${i === t ? 'is-today' : ''}" id="day-${i}" data-day="${i}" style="--c:${dayColor(i)}">
+      <button class="day-head reveal" data-toggle="${i}" aria-expanded="${open}" aria-controls="tl-${i}">
         <span class="tape-chip">Day ${i + 1}</span>
-        <div><h2>${esc(d.city || 'Day ' + (i + 1))}</h2><p>${esc(fmtDate(dayDate(trip, i)))}${d.title ? ' · ' + esc(d.title) : ''}</p></div>
-        ${total ? `<span class="day-total">${money(total)}</span>` : ''}
-      </header>
-      <ol class="timeline">
+        <span class="day-titles">
+          <span class="day-city">${esc(d.city || 'Day ' + (i + 1))}${i === t ? ' <em class="today-pill">Today</em>' : ''}</span>
+          <span class="day-sub">${esc(fmtDate(date))}${d.title ? ' · ' + esc(d.title) : ''}</span>
+          <span class="day-meta">
+            <span class="wx-day" data-day="${i}"></span>
+            ${total ? `<span class="day-total">${money(total)}</span>` : ''}
+            ${closedCount ? `<span class="closed-count">⚠️ ${closedCount} closed</span>` : ''}
+          </span>
+        </span>
+        <span class="chev" aria-hidden="true">▾</span>
+      </button>
+      <p class="day-peek">${d.activities.map((a) => `${(TYPES[a.type] || TYPES.other).icon} ${esc(a.name)}`).join('<span> · </span>') || 'Nothing planned yet.'}</p>
+      <ol class="timeline" id="tl-${i}">
         ${d.activities.map((a, j) => actCard(a, i, j)).join('') || '<li class="stop"><p class="hint">Nothing planned yet.</p></li>'}
       </ol>
     </section>`;
   }).join('');
 
   $('#days').addEventListener('click', (e) => {
+    const head = e.target.closest('[data-toggle]');
+    if (head) { openDay(+head.dataset.toggle, null); return; }
+    const peek = e.target.closest('.day-peek');
+    if (peek) { openDay(+peek.closest('.day').dataset.day, true); return; }
     const mapBtn = e.target.closest('.map-btn');
     if (mapBtn) { e.stopPropagation(); mapApi.focus(+mapBtn.dataset.d, +mapBtn.dataset.a); return; }
     if (e.target.closest('.waze-btn')) return; // let the link open Waze without toggling the card
@@ -119,6 +161,15 @@ function renderDays() {
     const card = e.target.closest('.act');
     if (card) card.classList.toggle('open');
   });
+}
+
+// open: true = open, false = fold, null = toggle
+function openDay(i, open) {
+  const sec = document.getElementById(`day-${i}`);
+  if (!sec) return;
+  const willOpen = open == null ? sec.classList.contains('folded') : open;
+  sec.classList.toggle('folded', !willOpen);
+  sec.querySelector('.day-head').setAttribute('aria-expanded', willOpen);
 }
 
 // Opens Waze with directions to this stop: the app on phones, waze.com on computers.
@@ -134,27 +185,107 @@ function wazeLink(a) {
     </svg></a>`;
 }
 
+function closedNote(a, d) {
+  if (!closedToday(a, d)) return '';
+  return `<p class="closed-warn">⚠️ Usually closed on ${WEEKDAYS[dayDate(trip, d).getDay()]}s — check before going</p>`;
+}
+
 function actCard(a, d, j) {
   const t = TYPES[a.type] || TYPES.other;
-  const hasGeo = a.lat != null && a.lng != null && a.lat !== '';
   return `
   <li class="stop reveal" id="act-${d}-${j}">
     <span class="dot" aria-hidden="true">${t.icon}</span>
-    <article class="act" tabindex="0">
+    <article class="act ${closedToday(a, d) ? 'is-closed' : ''}" tabindex="0">
       <div class="act-main">
         ${a.time ? `<div class="time">${esc(a.time)}</div>` : ''}
         <h3>${esc(a.name || 'Untitled')}</h3>
         ${a.place ? `<div class="place">📍 ${esc(a.place)}</div>` : ''}
+        ${closedNote(a, d)}
         ${a.note ? `<p class="note">${esc(a.note)}</p>` : ''}
         <div class="act-foot">
           <span class="chip">${t.icon} ${t.label}</span>
           ${a.cost ? `<span class="chip cost">${money(a.cost)}</span>` : ''}
-          ${hasGeo ? `<button class="chip map-btn" data-d="${d}" data-a="${j}">🗺️ Map</button>${wazeLink(a)}` : ''}
+          <span class="wx-act" data-d="${d}" data-a="${j}"></span>
+          ${hasGeo(a) ? `<button class="chip map-btn" data-d="${d}" data-a="${j}">🗺️ Map</button>${wazeLink(a)}` : ''}
         </div>
       </div>
       ${a.photo ? `<figure class="polaroid" style="--r:${tilt(a.name + j)}" data-caption="${esc(a.name)}"><img src="${a.photo}" alt="${esc(a.name)}" loading="lazy"></figure>` : ''}
     </article>
   </li>`;
+}
+
+/* ---------- today: "Next up" card (only on trip days) ---------- */
+function renderToday() {
+  const box = $('#today');
+  const d = todayIdx();
+  if (d < 0) { box.hidden = true; return; }
+  box.hidden = false;
+  const day = trip.days[d];
+  const n = now(), nowMin = n.getHours() * 60 + n.getMinutes();
+  const timed = day.activities.map((a, j) => ({ a, j })).filter(({ a }) => a.time);
+  const next = timed.find(({ a }) => minutes(a.time) > nowMin);
+  const current = [...timed].reverse().find(({ a }) => minutes(a.time) <= nowMin && nowMin - minutes(a.time) < 120);
+
+  const until = (a) => {
+    const m = minutes(a.time) - nowMin;
+    return m < 60 ? `in ${m} min` : `in ${Math.floor(m / 60)}h ${m % 60 ? (m % 60) + 'm' : ''}`.trim();
+  };
+  const stopRow = ({ a, j }, label, when) => `
+    <div class="today-stop">
+      <span class="today-label">${label}</span>
+      <div class="today-main">
+        <b>${esc(a.time)} · ${esc(a.name)}</b>
+        <small>${when}${a.place ? ' · 📍 ' + esc(a.place) : ''}</small>
+        ${closedNote(a, d)}
+      </div>
+      ${hasGeo(a) ? `<span class="today-actions"><button class="chip map-btn" data-d="${d}" data-a="${j}">🗺️</button>${wazeLink(a)}</span>` : ''}
+    </div>`;
+
+  let body = '';
+  if (current && current !== next) body += stopRow(current, 'Now', 'happening now');
+  if (next) body += stopRow(next, 'Next', until(next.a));
+  if (!next) {
+    const tomorrow = trip.days[d + 1];
+    body += `<p class="today-done">${tomorrow
+      ? `That's everything for today 🌙 Tomorrow: <b>${esc(tomorrow.city || 'Day ' + (d + 2))}</b>${tomorrow.activities[0] ? ', starting ' + esc(tomorrow.activities[0].time || '') + ' with ' + esc(tomorrow.activities[0].name) : ''}.`
+      : 'Last stop done — safe travels home! ✈️'}</p>`;
+  }
+  box.innerHTML = `
+    <div class="today-card taped" style="--c:${dayColor(d)}">
+      <div class="today-head">
+        <span class="tape-chip">Today · Day ${d + 1}</span>
+        <button class="btn small ghost" data-goto="${d}">Full day ↓</button>
+        <span class="wx-today"></span>
+      </div>
+      ${body}
+    </div>`;
+  box.onclick = (e) => {
+    const g = e.target.closest('[data-goto]');
+    if (g) return goToDay(+g.dataset.goto);
+    const m = e.target.closest('.map-btn');
+    if (m) mapApi.focus(+m.dataset.d, +m.dataset.a);
+  };
+  dayForecast(trip, d).then((wx) => { const el = $('.wx-today'); if (el) el.textContent = dayLabel(wx); });
+}
+
+/* ---------- weather ---------- */
+function loadWeather() {
+  trip.days.forEach((d, i) => {
+    dayForecast(trip, i).then((wx) => {
+      const head = document.querySelector(`.wx-day[data-day="${i}"]`);
+      if (head) head.textContent = dayLabel(wx);
+      if (!wx || wx.status) return;
+      d.activities.forEach((a, j) => {
+        const pop = rainAt(wx, a.time);
+        if (pop == null) return;
+        const el = document.querySelector(`.wx-act[data-d="${i}"][data-a="${j}"]`);
+        if (!el) return;
+        const [icon] = describe(wx.hours[+a.time.slice(0, 2)].code);
+        const wet = pop >= 60 && OUTDOOR.has(a.type);
+        el.innerHTML = `<span class="chip wx ${wet ? 'wet' : ''}" title="Chance of rain at ${esc(a.time)}">${icon} ${pop}% rain${wet ? ' · bring umbrella' : ''}</span>`;
+      });
+    });
+  });
 }
 
 /* ---------- food / tips / packing ---------- */
@@ -240,12 +371,12 @@ function initMap() {
     const c = dayColor(i), g = L.featureGroup(), pts = [];
     markers[i] = [];
     d.activities.forEach((a, j) => {
-      if (a.lat == null || a.lng == null || a.lat === '') return;
+      if (!hasGeo(a)) return;
       const ll = [Number(a.lat), Number(a.lng)];
       pts.push(ll);
       const m = L.marker(ll, {
         icon: L.divIcon({ className: '', html: `<div class="map-pin" style="--c:${c}"><span>${j + 1}</span></div>`, iconSize: [30, 30], iconAnchor: [15, 30], popupAnchor: [0, -28] }),
-      }).bindPopup(`<b>${esc(a.name)}</b><br><small>Day ${i + 1}${a.time ? ' · ' + esc(a.time) : ''}${a.place ? ' · ' + esc(a.place) : ''}</small><div class="popup-actions">${wazeLink(a)}</div>`);
+      }).bindPopup(`<b>${esc(a.name)}</b><br><small>Day ${i + 1}${a.time ? ' · ' + esc(a.time) : ''}${a.place ? ' · ' + esc(a.place) : ''}</small>${closedToday(a, i) ? `<br><small class="closed-warn">⚠️ Usually closed on ${WEEKDAYS[dayDate(trip, i).getDay()]}s</small>` : ''}<div class="popup-actions">${wazeLink(a)}</div>`);
       m.on('click', () => flash(i, j));
       m.addTo(g);
       markers[i][j] = m;
@@ -279,11 +410,13 @@ function initMap() {
   backdrop.addEventListener('click', close);
 
   map.setView([0, 0], 2);
-  show(null);
+  const t = todayIdx();
+  show(t >= 0 ? t : null);
 
   return {
     show(day) { if (isDesktop() && day !== current) show(day); },
     focus(d, j) {
+      openDay(d, true);
       const go = () => {
         if (current !== null && current !== d) show(d);
         else groups[d].addTo(map);
@@ -297,17 +430,18 @@ function initMap() {
 }
 
 // Map background. First choice: OpenFreeMap vector map (free, no API key, drawn with
-// WebGL so it stays sharp on Retina/phone screens). If WebGL or the style can't load,
-// fall back to OpenStreetMap picture tiles; if those fail too, show a notice.
+// WebGL so it stays sharp on Retina/phone screens). Its look follows the edit page's
+// "Map colours" setting and night mode. If WebGL or the style can't load, fall back to
+// OpenStreetMap picture tiles; if those fail too, show a notice.
 function osmAttr() {
   return '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors';
 }
 
-function addTiles(map) {
+async function addTiles(map) {
   if (!window.maplibregl || !L.maplibreGL || !hasWebGL()) return addRasterTiles(map);
   let done = false;
   const vector = L.maplibreGL({
-    style: 'https://tiles.openfreemap.org/styles/liberty',
+    style: await mapStyle(trip.mapStyle, currentTheme()),
     attribution: `<a href="https://openfreemap.org" target="_blank" rel="noopener">OpenFreeMap</a> ${osmAttr()}`,
   }).addTo(map);
   const fallBack = () => {
@@ -323,6 +457,9 @@ function addTiles(map) {
     gl.once('load', () => { done = true; });
     gl.on('error', () => { if (!done) fallBack(); });
     setTimeout(() => { if (!done && !gl.isStyleLoaded()) fallBack(); }, 8000);
+    addEventListener('themechange', async () => {
+      if (map.hasLayer(vector)) gl.setStyle(await mapStyle(trip.mapStyle, currentTheme()));
+    });
   });
 }
 
@@ -348,6 +485,7 @@ function showMapNotice(map) {
 }
 
 function flash(d, j) {
+  openDay(d, true);
   const el = document.querySelector(`#act-${d}-${j} .act`);
   if (!el) return;
   if (isDesktop()) el.scrollIntoView({ behavior: 'smooth', block: 'center' });

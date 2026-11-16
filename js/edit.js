@@ -1,4 +1,6 @@
-import { loadTrip, loadPublished, saveLocal, clearLocal, normalize, TYPES, dayColor, dayDate, fmtDate, esc } from './store.js';
+import { loadTrip, loadPublished, saveLocal, clearLocal, normalize, TYPES, dayColor, dayDate, fmtDate, esc, WEEKDAYS } from './store.js';
+import { dayForecast, dayLabel, rainAt, describe, OUTDOOR } from './weather.js';
+import { initThemeToggle } from './theme.js';
 import { STYLES, fileToImage, stylize } from './paint.js';
 import { defaultCover } from './art.js';
 
@@ -13,12 +15,14 @@ const CURRENCIES = ['JPY', 'CNY', 'USD', 'EUR', 'GBP', 'MYR', 'SGD', 'HKD', 'TWD
 const STYLE_ICONS = { original: '📷', watercolor: '🎨', sketch: '✏️', anime: '🌸' };
 const STYLE_HINTS = { original: 'Keep photos as they are', watercolor: 'Soft painted postcard', sketch: 'Pencil & paper', anime: 'Bright cel-shaded look' };
 
+initThemeToggle($('#themeToggle'));
 render();
 
 /* ---------- rendering ---------- */
 function render() {
   app.innerHTML = tripPanel() + daysPanel() + foodPanel() + listsPanel() + dataPanel();
   initSortables();
+  fillWeather();
 }
 
 function tripPanel() {
@@ -44,6 +48,17 @@ function tripPanel() {
         </div>
       </div>
       <p class="hint">Every photo you add (cover, activities, food) is turned into this style automatically — right on your device.</p>
+
+      <div class="field"><span>Map colours</span>
+        <div class="style-picker">
+          <button class="style-opt ${trip.mapStyle !== 'standard' ? 'active' : ''}" data-act="map-style" data-look="soft">
+            <i>🗺️</i><b>Soft</b><small>Warm scrapbook tones</small>
+          </button>
+          <button class="style-opt ${trip.mapStyle === 'standard' ? 'active' : ''}" data-act="map-style" data-look="standard">
+            <i>🧭</i><b>Standard</b><small>Classic bright map</small>
+          </button>
+        </div>
+      </div>
 
       <div class="field"><span>Cover picture</span>${photoCtl('cover', trip.cover)}</div>
       ${coverOriginalUrl && trip.cover ? `
@@ -75,7 +90,7 @@ function dayEditor(day, d) {
       <button class="day-toggle" data-act="toggle-day" data-d="${d}">
         <span class="tape-chip">Day ${d + 1}</span>
         <span class="day-info"><span class="day-sum">${esc(day.city || 'Untitled')}</span>
-        <small>${date ? date + ' · ' : ''}${day.activities.length} stops</small></span>
+        <small>${date ? date + ' · ' : ''}${day.activities.length} stops <span class="wx-day" data-day="${d}"></span></small></span>
         <span class="chev">▾</span>
       </button>
       <button class="icon-btn" data-act="del-day" data-d="${d}" title="Delete day">🗑️</button>
@@ -85,6 +100,7 @@ function dayEditor(day, d) {
         <label class="field"><span>City</span><input type="text" data-bind="days.${d}.city" value="${esc(day.city)}"></label>
         <label class="field"><span>Theme of the day</span><input type="text" data-bind="days.${d}.title" value="${esc(day.title)}"></label>
       </div>
+      <div class="wx-strip" data-d="${d}"></div>
       <ul class="act-list" data-d="${d}">${day.activities.map((a, j) => actEditor(a, d, j)).join('')}</ul>
       <div class="btn-row">
         <button class="btn small primary" data-act="add-act" data-d="${d}">＋ Add activity</button>
@@ -112,12 +128,62 @@ function actEditor(a, d, j) {
     </div>
     <div class="coords ${hasGeo ? 'ok' : ''}">${hasGeo ? `📍 On the map (${(+a.lat).toFixed(4)}, ${(+a.lng).toFixed(4)})` : 'Not on the map yet — tap Find'}</div>
     <div class="geo-results"></div>
+    <div class="wx-act-ed" data-d="${d}" data-a="${j}"></div>
+    ${closedPicker(a, d, j)}
     <textarea placeholder="Notes, tips, booking info…" data-bind="${p}.note">${esc(a.note)}</textarea>
     <div class="bottom-row">
       <label class="field"><span>Cost (${esc(trip.currency)})</span><input type="number" inputmode="decimal" min="0" data-bind="${p}.cost" data-type="num" value="${a.cost ?? ''}"></label>
       ${photoCtl(`${p}.photo`, a.photo)}
     </div>
   </li>`;
+}
+
+// "Closed on" weekday toggles, with a warning if the stop is planned on one of them.
+function closedPicker(a, d, j) {
+  const closed = a.closed || [];
+  const dt = dayDate(trip, d);
+  const clash = dt && closed.includes(dt.getDay());
+  return `
+  <div class="closed-row">
+    <span>Closed on</span>
+    <div class="weekday-toggles">${[1, 2, 3, 4, 5, 6, 0].map((w) => `
+      <button type="button" class="wd ${closed.includes(w) ? 'on' : ''}" data-act="closed" data-d="${d}" data-a="${j}" data-w="${w}" aria-pressed="${closed.includes(w)}" title="${WEEKDAYS[w]}">${WEEKDAYS[w].slice(0, 2)}</button>`).join('')}
+    </div>
+  </div>
+  ${clash ? `<p class="closed-warn">⚠️ Day ${d + 1} is a ${WEEKDAYS[dt.getDay()]} — this place is usually closed. Move it to another day?</p>` : ''}`;
+}
+
+/* ---------- weather while planning ---------- */
+function fillWeather() {
+  trip.days.forEach((day, d) => {
+    dayForecast(trip, d).then((wx) => {
+      const head = document.querySelector(`.day-ed .wx-day[data-day="${d}"]`);
+      if (head) head.textContent = dayLabel(wx) ? '· ' + dayLabel(wx) : '';
+      const strip = document.querySelector(`.wx-strip[data-d="${d}"]`);
+      if (strip) strip.innerHTML = rainStrip(wx);
+      day.activities.forEach((a, j) => {
+        const el = document.querySelector(`.wx-act-ed[data-d="${d}"][data-a="${j}"]`);
+        if (!el) return;
+        const pop = rainAt(wx, a.time);
+        if (pop == null) { el.innerHTML = ''; return; }
+        const [icon, text] = describe(wx.hours[+a.time.slice(0, 2)].code);
+        const wet = pop >= 60 && OUTDOOR.has(a.type);
+        el.innerHTML = `<span class="wx-line ${wet ? 'wet' : ''}">${icon} ${text}, ${pop}% rain at ${esc(a.time)}${wet ? ' — outdoor stop: try a drier hour or keep an indoor backup' : ''}</span>`;
+      });
+    });
+  });
+}
+
+function rainStrip(wx) {
+  if (!wx) return '';
+  if (wx.status === 'too-far') return `<p class="wx-note">🌤️ Hourly forecast appears about 2 weeks before this day.</p>`;
+  if (wx.status) return '';
+  const hours = [];
+  for (let h = 7; h <= 22; h++) hours.push([h, wx.hours[h]?.pop ?? 0]);
+  return `
+    <div class="wx-strip-head">${dayLabel(wx)} <small>· rain chance by hour — put outdoor stops in the low bars</small></div>
+    <div class="wx-bars">${hours.map(([h, p]) => `<i class="${p >= 60 ? 'hi' : p >= 30 ? 'mid' : ''}" style="--h:${Math.max(p, 4)}%" title="${h}:00 · ${p}% rain"></i>`).join('')}</div>
+    <div class="wx-axis"><span>7am</span><span>11am</span><span>3pm</span><span>7pm</span><span>10pm</span></div>`;
 }
 
 function photoCtl(path, val) {
@@ -221,6 +287,7 @@ app.addEventListener('input', (e) => {
   // live-update the collapsed day header
   const m = el.dataset.bind.match(/^days\.(\d+)\.city$/);
   if (m) $(`.day-ed[data-d="${m[1]}"] .day-sum`).textContent = v || 'Untitled';
+  if (/\.(time|type)$/.test(el.dataset.bind)) fillWeather();
   save();
 });
 
@@ -277,6 +344,18 @@ app.addEventListener('click', async (e) => {
       if (!a.place) a.place = b.dataset.name.split(',')[0];
       break;
     }
+    case 'closed': {
+      const a = trip.days[d].activities[j], w = +b.dataset.w;
+      const set = new Set(a.closed || []);
+      set.has(w) ? set.delete(w) : set.add(w);
+      a.closed = [...set].sort();
+      if (!a.closed.length) delete a.closed;
+      break;
+    }
+    case 'map-style':
+      trip.mapStyle = b.dataset.look;
+      toast(`Map colours: ${b.dataset.look === 'standard' ? 'Standard' : 'Soft'} — see it on the plan page`);
+      break;
     case 'export': download(); return;
     case 'reset':
       if (!confirm('Discard all edits on this device and reload the published plan?')) return;
