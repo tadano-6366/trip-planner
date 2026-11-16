@@ -198,16 +198,46 @@ function photoCtl(path, val) {
 function foodPanel() {
   return `
   <section class="panel">
-    <div class="panel-head"><h2 class="label"><b>3</b>Must-eat</h2><button class="btn small" data-act="add-food">＋ Add food</button></div>
-    <ul class="list-ed" id="foodList">${trip.foods.map((f, i) => `
-      <li data-i="${i}">
-        <div class="row"><span class="grip food-grip">⋮⋮</span><input type="text" class="big" placeholder="Dish" data-bind="foods.${i}.name" value="${esc(f.name)}">
-          <button class="icon-btn" data-act="del-food" data-i="${i}" title="Delete">✕</button></div>
-        <input type="text" placeholder="Where / why" data-bind="foods.${i}.note" value="${esc(f.note)}">
-        ${photoCtl(`foods.${i}.photo`, f.photo)}
-      </li>`).join('')}
-    </ul>
+    <div class="panel-head"><h2 class="label"><b>3</b>Food board</h2><button class="btn small" data-act="add-food">＋ Add food</button></div>
+    <p class="hint">Options to choose from on the trip, not a schedule. Add a place and opening hours so the board can show distance, Waze and "Open now".</p>
+    <ul class="list-ed" id="foodList">${trip.foods.map(foodEditor).join('')}</ul>
+    <button class="btn primary" data-act="add-food">＋ Add food</button>
   </section>`;
+}
+
+function foodEditor(f, i) {
+  const p = `foods.${i}`;
+  const geo = f.lat != null && f.lat !== '';
+  const closed = f.closed || [];
+  return `
+  <li data-i="${i}" class="food-ed">
+    <div class="row"><span class="grip food-grip">⋮⋮</span><input type="text" class="big" placeholder="Dish or stall" data-bind="${p}.name" value="${esc(f.name)}">
+      <button class="icon-btn" data-act="del-food" data-i="${i}" title="Delete">✕</button></div>
+    <input type="text" placeholder="What's good / why go" data-bind="${p}.note" value="${esc(f.note)}">
+    <div class="grid2">
+      <label class="field"><span>Area</span><input type="text" placeholder="e.g. George Town" data-bind="${p}.area" value="${esc(f.area)}"></label>
+      <label class="field"><span>Price</span><select data-bind="${p}.price" data-type="num">
+        ${[['', '—'], [1, '$ · cheap'], [2, '$$ · mid'], [3, '$$$ · treat']].map(([v, t]) => `<option value="${v}" ${String(f.price ?? '') === String(v) ? 'selected' : ''}>${t}</option>`).join('')}
+      </select></label>
+    </div>
+    <div class="place-row">
+      <input type="text" placeholder="Stall name or address" data-bind="${p}.place" value="${esc(f.place)}">
+      <button class="btn small" data-act="geo-food" data-i="${i}">🔍 Find</button>
+    </div>
+    <div class="coords ${geo ? 'ok' : ''}">${geo ? `📍 On the map (${(+f.lat).toFixed(4)}, ${(+f.lng).toFixed(4)})` : 'Not on the map yet — tap Find'}</div>
+    <div class="geo-results"></div>
+    <div class="hours-row">
+      <span>Opens</span><input type="time" data-bind="${p}.open" value="${esc(f.open || '')}">
+      <span>closes</span><input type="time" data-bind="${p}.close" value="${esc(f.close || '')}">
+    </div>
+    <div class="closed-row">
+      <span>Closed on</span>
+      <div class="weekday-toggles">${[1, 2, 3, 4, 5, 6, 0].map((w) => `
+        <button type="button" class="wd ${closed.includes(w) ? 'on' : ''}" data-act="closed-food" data-i="${i}" data-w="${w}" aria-pressed="${closed.includes(w)}" title="${WEEKDAYS[w]}">${WEEKDAYS[w].slice(0, 2)}</button>`).join('')}
+      </div>
+    </div>
+    ${photoCtl(`${p}.photo`, f.photo)}
+  </li>`;
 }
 
 function listsPanel() {
@@ -352,6 +382,21 @@ app.addEventListener('click', async (e) => {
       if (!a.closed.length) delete a.closed;
       break;
     }
+    case 'closed-food': {
+      const f = trip.foods[i], w = +b.dataset.w;
+      const set = new Set(f.closed || []);
+      set.has(w) ? set.delete(w) : set.add(w);
+      f.closed = [...set].sort();
+      if (!f.closed.length) delete f.closed;
+      break;
+    }
+    case 'geo-food': await geoSearchFood(b, i); return;
+    case 'geo-pick-food': {
+      const f = trip.foods[i];
+      f.lat = +b.dataset.lat; f.lng = +b.dataset.lng;
+      if (!f.place) f.place = b.dataset.name.split(',')[0];
+      break;
+    }
     case 'map-style':
       trip.mapStyle = b.dataset.look;
       toast(`Map colours: ${b.dataset.look === 'standard' ? 'Standard' : 'Soft'} — see it on the plan page`);
@@ -417,6 +462,20 @@ async function geoSearch(btn, d, j) {
       : '<button disabled>No match — try a simpler name</button>';
   } catch { box.innerHTML = '<button disabled>Search failed on this network — try mobile data, or turn off an ad blocker</button>'; }
 }
+async function geoSearchFood(btn, i) {
+  const f = trip.foods[i];
+  const box = btn.closest('.food-ed').querySelector('.geo-results');
+  if (!f.place && !f.name) { toast('Type a stall name or address first'); return; }
+  box.innerHTML = '<button disabled>Searching…</button>';
+  try {
+    let res = await nominatim([f.place || f.name, f.area, trip.destination].filter(Boolean).join(', '));
+    if (!res.length) res = await nominatim([f.place || f.name, trip.destination].filter(Boolean).join(', '));
+    box.innerHTML = res.length
+      ? res.map((r) => `<button data-act="geo-pick-food" data-i="${i}" data-lat="${r.lat}" data-lng="${r.lon}" data-name="${esc(r.display_name)}">📍 ${esc(r.display_name)}</button>`).join('')
+      : '<button disabled>No match — try the stall name plus street</button>';
+  } catch { box.innerHTML = '<button disabled>Search failed on this network — try mobile data, or turn off an ad blocker</button>'; }
+}
+
 // Place search: OpenStreetMap Nominatim, falling back to Photon if Nominatim is
 // blocked or down. Both return [{ lat, lon, display_name }].
 async function nominatim(q) {

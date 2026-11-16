@@ -39,9 +39,12 @@
         <h2 class="label"><b>2</b>Day by day</h2>
         <div id="days"></div>
       </section>
-      <section id="food" class="reveal">
-        <h2 class="label"><b>3</b>Must-eat</h2>
-        <div class="food-row" id="foodRow"></div>
+      <section id="food">
+        <h2 class="label"><b>3</b>Food board</h2>
+        <p class="board-intro">Options, not a schedule — pick whatever fits where you are and what's open.</p>
+        <div class="board-tools" id="foodTools"></div>
+        <p class="board-pick" id="foodPick" hidden></p>
+        <div class="food-board" id="foodBoard"></div>
       </section>
       <section id="tips" class="reveal">
         <h2 class="label"><b>4</b>Good to know</h2>
@@ -76,6 +79,16 @@
 
   <div class="backdrop" id="backdrop"></div>
   <button class="fab-map" id="fabMap">🗺️ Map</button>
+  <dialog class="add-plan" id="addPlan">
+    <form method="dialog">
+      <h3>Add to plan</h3>
+      <p class="add-plan-name"></p>
+      <label class="field"><span>Day</span><select name="day"></select></label>
+      <label class="field"><span>Time</span><input type="time" name="time" value="12:00"></label>
+      <p class="hint">This is saved on this device. Publish from the edit page to share it.</p>
+      <div class="btn-row"><button class="btn primary" value="add">Add</button><button class="btn ghost" value="cancel">Cancel</button></div>
+    </form>
+  </dialog>
   <div class="lightbox" id="lightbox"><figure><img alt=""><figcaption></figcaption></figure></div>
 
   <script src="vendor/leaflet.js"></script>

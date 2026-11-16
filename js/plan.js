@@ -1,4 +1,5 @@
-import { loadTrip, TYPES, dayColor, dayDate, parseDate, fmtDate, fmtMoney, esc, tilt, packedState, savePackedState, WEEKDAYS } from './store.js';
+import { loadTrip, saveLocal, TYPES, dayColor, dayDate, parseDate, fmtDate, fmtMoney, esc, tilt, packedState, savePackedState, WEEKDAYS } from './store.js';
+import { openStatus, km, priceLabel, triedState, saveTried } from './food.js';
 import { defaultCover } from './art.js';
 import { dayForecast, dayLabel, rainAt, describe, OUTDOOR } from './weather.js';
 import { initThemeToggle, currentTheme } from './theme.js';
@@ -18,6 +19,11 @@ const minutes = (hhmm) => { const [h, m] = (hhmm || '').split(':').map(Number); 
 const hasGeo = (a) => a.lat != null && a.lng != null && a.lat !== '';
 const closedToday = (a, d) => { const dt = dayDate(trip, d); return dt && (a.closed || []).includes(dt.getDay()); };
 
+// Food board state
+const PH_EMOJI = ['🍜', '🍲', '🍛', '🍧', '🍤', '🥘', '🍢', '🥥'];
+const board = { open: false, hideTried: false, area: '', sort: todayIdx() >= 0 ? `day:${todayIdx()}` : '', me: null };
+let picking = false;
+
 document.title = `${trip.title} · Trip Plan`;
 initThemeToggle($('#themeToggle'));
 renderHero();
@@ -30,11 +36,12 @@ renderTips();
 renderPacking();
 renderBudget();
 const mapApi = initMap();
+openDayFromHash();
 initReveal();
 initScrollSpy();
 initLightbox();
 loadWeather();
-setInterval(renderToday, 60e3);
+setInterval(() => { renderToday(); renderFoodBoard(); }, 60e3);
 
 if (source === 'local') {
   $('#banner').innerHTML = `<div class="local-banner">✏️ You're seeing your unpublished edits on this device. <a href="edit.html#publish">Publish</a> so others see them too.</div>`;
@@ -289,19 +296,173 @@ function loadWeather() {
 }
 
 /* ---------- food / tips / packing ---------- */
+/* ---------- food board: options to pick from ---------- */
+
 function renderFood() {
   if (!trip.foods.length) { $('#food').hidden = true; return; }
-  $('#foodRow').innerHTML = trip.foods.map((f, i) => `
-    <figure class="polaroid taped" style="--r:${tilt(f.name + i)}" data-caption="${esc(f.name)}">
-      ${f.photo ? `<img src="${f.photo}" alt="${esc(f.name)}" loading="lazy">` : `<div class="ph">${['🍜', '🍲', '🍛', '🍧', '🍤', '🥘', '🍢', '🥥'][i % 8]}</div>`}
-      <figcaption>${esc(f.name)}</figcaption>
-      ${f.note ? `<p>${esc(f.note)}</p>` : ''}
-    </figure>`).join('');
-  $('#foodRow').addEventListener('click', (e) => {
-    const pic = e.target.closest('.polaroid');
-    const img = pic?.querySelector('img');
-    if (img) openLightbox(img.src, pic.dataset.caption);
-  });
+  const areas = [...new Set(trip.foods.map((f) => (f.area || '').trim()).filter(Boolean))].sort();
+  const anyGeo = trip.foods.some(hasGeo);
+  const anyHours = trip.foods.some((f) => f.open || (f.closed || []).length);
+  $('#foodTools').innerHTML = `
+    <button class="btn small primary" data-pick>🎲 Pick for me</button>
+    ${anyHours ? `<button class="fchip" data-filter="open" aria-pressed="false">🕒 Open now</button>` : ''}
+    <button class="fchip" data-filter="hideTried" aria-pressed="false">✓ Hide tried</button>
+    ${areas.length ? `<select data-area aria-label="Area"><option value="">📍 All areas</option>${areas.map((a) => `<option>${esc(a)}</option>`).join('')}</select>` : ''}
+    ${anyGeo ? `<select data-sort aria-label="Sort by distance"><option value="">↕ Board order</option>${trip.days.map((d, i) => `<option value="day:${i}" ${board.sort === `day:${i}` ? 'selected' : ''}>Near Day ${i + 1}${d.city ? ' · ' + esc(d.city) : ''}</option>`).join('')}<option value="me">Near me (GPS)</option></select>` : ''}`;
+
+  $('#foodTools').onclick = (e) => {
+    const f = e.target.closest('[data-filter]');
+    if (f) { board[f.dataset.filter] = !board[f.dataset.filter]; f.setAttribute('aria-pressed', board[f.dataset.filter]); renderFoodBoard(); }
+    if (e.target.closest('[data-pick]')) pickForMe();
+  };
+  $('#foodTools').onchange = (e) => {
+    if (e.target.matches('[data-area]')) board.area = e.target.value;
+    if (e.target.matches('[data-sort]')) {
+      board.sort = e.target.value;
+      if (board.sort === 'me' && !board.me) return locateMe(e.target);
+    }
+    renderFoodBoard();
+  };
+  $('#foodBoard').onclick = (e) => {
+    const t = e.target.closest('[data-tried]');
+    if (t) { const s = triedState(), n = trip.foods[+t.dataset.tried].name; s[n] = !s[n]; saveTried(s); renderFoodBoard(); return; }
+    const m = e.target.closest('[data-food-map]');
+    if (m) { mapApi.focusFood(+m.dataset.foodMap); return; }
+    const add = e.target.closest('[data-addplan]');
+    if (add) { addToPlan(+add.dataset.addplan); return; }
+    if (e.target.closest('.waze-btn')) return;
+    const pic = e.target.closest('.food-pic img');
+    if (pic) openLightbox(pic.src, pic.alt);
+  };
+  renderFoodBoard();
+}
+
+function locateMe(select) {
+  if (!navigator.geolocation) { select.value = ''; board.sort = ''; return; }
+  $('#foodPick').hidden = false;
+  $('#foodPick').textContent = '📡 Finding where you are…';
+  navigator.geolocation.getCurrentPosition(
+    (pos) => { board.me = { lat: pos.coords.latitude, lng: pos.coords.longitude }; $('#foodPick').hidden = true; renderFoodBoard(); },
+    () => { $('#foodPick').textContent = "Couldn't get your location — check location permission for this site."; select.value = ''; board.sort = ''; renderFoodBoard(); },
+    { enableHighAccuracy: false, timeout: 10000, maximumAge: 300000 },
+  );
+}
+
+// Reference points for distance sorting: "me", or each stop of the chosen day.
+function sortOrigins() {
+  if (board.sort === 'me') return board.me ? [{ ...board.me, name: '' }] : null;
+  if (!board.sort.startsWith('day:')) return null;
+  const pts = (trip.days[+board.sort.slice(4)]?.activities || []).filter(hasGeo)
+    .map((a) => ({ lat: +a.lat, lng: +a.lng, name: a.name }));
+  return pts.length ? pts : null;
+}
+
+// Distance to the closest reference point, and which one it was.
+function nearest(origins, f) {
+  if (!origins || !hasGeo(f)) return null;
+  let best = null;
+  for (const o of origins) {
+    const d = km(o, { lat: +f.lat, lng: +f.lng });
+    if (!best || d < best.d) best = { d, name: o.name };
+  }
+  return best;
+}
+
+function visibleFoods() {
+  const tried = triedState(), n = now(), origins = sortOrigins();
+  let list = trip.foods.map((f, i) => ({ f, i, st: openStatus(f, n), tried: !!tried[f.name], near: nearest(origins, f) }));
+  if (board.open) list = list.filter((x) => x.st.state === 'open' || x.st.state === 'unknown');
+  if (board.hideTried) list = list.filter((x) => !x.tried);
+  if (board.area) list = list.filter((x) => (x.f.area || '').trim() === board.area);
+  if (origins) list.sort((a, b) => (a.near?.d ?? 1e9) - (b.near?.d ?? 1e9));
+  return list;
+}
+
+function renderFoodBoard() {
+  if (!trip.foods.length) return;
+  const list = visibleFoods();
+  const fmtKm = (d) => (d < 1 ? Math.round(d * 1000 / 10) * 10 + ' m' : d.toFixed(1) + ' km');
+  $('#foodBoard').innerHTML = list.map(({ f, i, st, tried, near }) => `
+    <article class="food-card ${tried ? 'tried' : ''} ${st.state === 'closed' || st.state === 'later' ? 'shut' : ''}" data-card="${i}" style="--r:${tilt(f.name + i) / 3}">
+      <div class="food-pic">
+        ${f.photo ? `<img src="${f.photo}" alt="${esc(f.name)}" loading="lazy">` : `<div class="ph">${PH_EMOJI[i % PH_EMOJI.length]}</div>`}
+        ${tried ? '<span class="tried-stamp">Tried ✓</span>' : ''}
+      </div>
+      <div class="food-body">
+        <h3>${esc(f.name || 'Untitled')}</h3>
+        ${f.note ? `<p class="food-note">${esc(f.note)}</p>` : ''}
+        <div class="food-meta">
+          ${f.area ? `<span>📍 ${esc(f.area)}</span>` : ''}
+          ${f.price ? `<span class="price">${priceLabel(f.price)}</span>` : ''}
+          ${near ? `<span class="near">${near.d < 0.05 ? (near.name ? 'Right by ' + esc(near.name) : 'Right here') : `${fmtKm(near.d)} ${near.name ? 'from ' + esc(near.name) : 'away'}`}</span>` : ''}
+        </div>
+        ${st.text ? `<span class="status ${st.state} ${st.soon ? 'soon' : ''}">${st.text}</span>` : ''}
+        <div class="food-actions">
+          <button class="tried-btn ${tried ? 'on' : ''}" data-tried="${i}" aria-pressed="${tried}">${tried ? '✓ Tried' : 'Tried?'}</button>
+          <button class="chip plan-btn" data-addplan="${i}" title="Add to a day's plan">＋ Plan</button>
+          ${hasGeo(f) ? `<button class="chip map-btn" data-food-map="${i}" title="Show on map">🗺️</button>${wazeLink(f)}` : ''}
+        </div>
+      </div>
+    </article>`).join('') || `<p class="board-empty">Nothing matches these filters right now.</p>`;
+}
+
+// Shuffle a highlight across the open, untried options, then land on one.
+function pickForMe() {
+  if (picking) return;
+  const pool = visibleFoods().filter((x) => !x.tried && x.st.state !== 'closed' && x.st.state !== 'later');
+  const msg = $('#foodPick');
+  if (!pool.length) { msg.hidden = false; msg.textContent = 'No open, untried options with these filters — try clearing a filter.'; return; }
+  picking = true;
+  const winner = pool[Math.floor(Math.random() * pool.length)];
+  const steps = Math.min(14, 6 + pool.length * 2);
+  let k = 0;
+  msg.hidden = false; msg.textContent = '🎲 Hmm, let me think…';
+  const card = (x) => document.querySelector(`[data-card="${x.i}"]`);
+  const tick = () => {
+    document.querySelectorAll('.food-card.picking').forEach((c) => c.classList.remove('picking'));
+    const x = k >= steps - 1 ? winner : pool[k % pool.length];
+    card(x)?.classList.add('picking');
+    if (k++ < steps - 1) return setTimeout(tick, 70 + k * 18);
+    const el = card(winner);
+    el?.classList.remove('picking');
+    el?.classList.add('picked');
+    el?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    msg.innerHTML = `🎉 Today's pick: <b>${esc(winner.f.name)}</b>${winner.f.area ? ' in ' + esc(winner.f.area) : ''}!`;
+    setTimeout(() => el?.classList.remove('picked'), 2600);
+    picking = false;
+  };
+  tick();
+}
+
+// "+ Plan": add a food option to a day's schedule (saved on this device until published).
+function addToPlan(i) {
+  const f = trip.foods[i], dlg = $('#addPlan');
+  if (!dlg.showModal) { alert('Open the edit page to add this to your plan.'); return; }
+  dlg.querySelector('.add-plan-name').textContent = `${f.name}${f.area ? ' · ' + f.area : ''}`;
+  const t = todayIdx();
+  dlg.querySelector('[name=day]').innerHTML = trip.days.map((d, k) =>
+    `<option value="${k}" ${k === Math.max(t, 0) ? 'selected' : ''}>Day ${k + 1}${d.city ? ' · ' + esc(d.city) : ''} (${esc(fmtDate(dayDate(trip, k)))})</option>`).join('');
+  dlg.onclose = () => {
+    if (dlg.returnValue !== 'add') return;
+    const d = +dlg.querySelector('[name=day]').value, time = dlg.querySelector('[name=time]').value;
+    const act = { time, type: 'food', name: f.name, place: f.place || f.area || '', note: f.note || '', cost: null };
+    if (hasGeo(f)) { act.lat = +f.lat; act.lng = +f.lng; }
+    if (f.closed?.length) act.closed = [...f.closed];
+    if (f.photo) act.photo = f.photo;
+    trip.days[d].activities.push(act);
+    trip.days[d].activities.sort((a, b) => (a.time || '99').localeCompare(b.time || '99'));
+    try { saveLocal(trip); } catch { alert('Could not save on this device (storage full).'); return; }
+    location.hash = `day-${d}`;
+    location.reload();
+  };
+  dlg.showModal();
+}
+
+function openDayFromHash() {
+  const m = location.hash.match(/^#day-(\d+)$/);
+  if (!m || !trip.days[+m[1]]) return;
+  openDay(+m[1], true);
+  setTimeout(() => document.getElementById(`day-${m[1]}`)?.scrollIntoView({ behavior: 'smooth' }), 300);
 }
 
 function renderTips() {
@@ -360,7 +521,7 @@ function renderBudget() {
 /* ---------- map ---------- */
 function initMap() {
   const wrap = $('#mapWrap'), backdrop = $('#backdrop');
-  if (!window.L) { $('#fabMap').hidden = true; wrap.hidden = true; return { focus() {}, show() {} }; }
+  if (!window.L) { $('#fabMap').hidden = true; wrap.hidden = true; return { focus() {}, show() {}, focusFood() {} }; }
 
   const map = L.map('map', { zoomControl: false, scrollWheelZoom: true });
   L.control.zoom({ position: 'bottomright' }).addTo(map);
@@ -385,6 +546,22 @@ function initMap() {
     groups.push(g);
   });
 
+  // Food options as small 🍜 pins, toggled with the "Food" chip.
+  const foodLayer = L.featureGroup(), foodMarkers = [];
+  trip.foods.forEach((f, i) => {
+    if (!hasGeo(f)) return;
+    const st = openStatus(f, now());
+    const m = L.marker([+f.lat, +f.lng], {
+      icon: L.divIcon({ className: '', html: `<div class="food-pin ${st.state === 'closed' ? 'shut' : ''}">${PH_EMOJI[i % PH_EMOJI.length]}</div>`, iconSize: [28, 28], iconAnchor: [14, 14], popupAnchor: [0, -12] }),
+      zIndexOffset: -100,
+    }).bindPopup(`<b>${esc(f.name)}</b><br><small>${[f.area, priceLabel(f.price), st.text].filter(Boolean).map(esc).join(' · ') || 'Food option'}</small><div class="popup-actions">${wazeLink(f)}</div>`);
+    m.on('click', () => document.querySelector(`[data-card="${i}"]`)?.scrollIntoView({ behavior: 'smooth', block: 'center' }));
+    m.addTo(foodLayer);
+    foodMarkers[i] = m;
+  });
+  let showFood = true;
+  if (foodMarkers.length) foodLayer.addTo(map);
+
   let current = null;
   function show(day) {
     current = day;
@@ -396,10 +573,17 @@ function initMap() {
     document.querySelectorAll('#mapFilter button').forEach((btn) => btn.classList.toggle('active', btn.dataset.day === String(day ?? 'all')));
   }
 
-  $('#mapFilter').innerHTML = `<button data-day="all">All days</button>` +
+  $('#mapFilter').innerHTML = (foodMarkers.length ? `<button data-food class="food-toggle active" aria-pressed="true">🍜 Food</button>` : '') +
+    `<button data-day="all">All days</button>` +
     trip.days.map((d, i) => `<button data-day="${i}" style="--c:${dayColor(i)}">D${i + 1} ${esc(d.city || '')}</button>`).join('');
   $('#mapFilter').addEventListener('click', (e) => {
     const b = e.target.closest('button'); if (!b) return;
+    if (b.hasAttribute('data-food')) {
+      showFood = !showFood;
+      showFood ? foodLayer.addTo(map) : foodLayer.remove();
+      b.classList.toggle('active', showFood); b.setAttribute('aria-pressed', showFood);
+      return;
+    }
     show(b.dataset.day === 'all' ? null : +b.dataset.day);
   });
 
@@ -415,6 +599,15 @@ function initMap() {
 
   return {
     show(day) { if (isDesktop() && day !== current) show(day); },
+    focusFood(i) {
+      const go = () => {
+        if (!showFood) { showFood = true; foodLayer.addTo(map); document.querySelector('.food-toggle')?.classList.add('active'); }
+        const m = foodMarkers[i];
+        map.flyTo(m.getLatLng(), 16, { duration: .8 });
+        setTimeout(() => m.openPopup(), 850);
+      };
+      if (isDesktop()) { $('#mapWrap').scrollIntoView({ behavior: 'smooth', block: 'nearest' }); go(); } else { open(); setTimeout(go, 470); }
+    },
     focus(d, j) {
       openDay(d, true);
       const go = () => {

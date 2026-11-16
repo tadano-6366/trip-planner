@@ -562,3 +562,67 @@ details.gh summary { cursor: pointer; font-weight: 800; }
 .wd { width: 32px; height: 30px; border-radius: 8px; border: 1.5px solid var(--line); background: var(--field); font-size: 12px; font-weight: 800; color: var(--muted); padding: 0; }
 .wd.on { background: var(--red); border-color: var(--red); color: #fff; }
 .act-ed .closed-warn { margin: 0; }
+
+/* ---------- food board ---------- */
+.board-intro { margin: -6px 0 12px; color: var(--muted); font-size: 14px; }
+.board-tools { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin-bottom: 12px; }
+.board-tools select { width: auto; max-width: 100%; font-size: 14px; font-weight: 700; padding: 6px 10px; border-radius: 999px; }
+.fchip { border: 1.5px solid var(--line); background: var(--card); color: var(--ink); border-radius: 999px; padding: 6px 12px; font-size: 14px; font-weight: 700; }
+.fchip[aria-pressed="true"] { background: var(--ink); border-color: var(--ink); color: var(--on-ink); }
+.board-pick { margin: 0 0 12px; padding: 10px 14px; border-radius: 12px; background: var(--banner); border: 1px dashed var(--gold); font-weight: 600; }
+.food-board { display: grid; grid-template-columns: repeat(auto-fill, minmax(158px, 1fr)); gap: 16px; }
+@media (min-width: 600px) { .food-board { grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); } }
+.food-card {
+  display: flex; flex-direction: column; overflow: hidden; background: var(--card); border-radius: var(--radius);
+  box-shadow: var(--shadow); transform: rotate(calc(var(--r, 0) * 1deg));
+  transition: transform .3s cubic-bezier(.3,1.5,.5,1), box-shadow .3s, opacity .3s, outline-color .2s;
+  outline: 3px solid transparent; outline-offset: 2px;
+}
+.food-card:hover { transform: translateY(-3px); box-shadow: var(--shadow-lg); }
+.food-card.tried { opacity: .55; }
+.food-card.shut .food-pic { filter: grayscale(.7); }
+.food-card.picking { outline-color: var(--gold); transform: scale(1.04); }
+.food-card.picked { outline-color: var(--red); animation: wiggle .5s ease 3; }
+@keyframes wiggle { 25% { transform: rotate(-2deg) scale(1.05); } 75% { transform: rotate(2deg) scale(1.05); } }
+.food-pic { position: relative; aspect-ratio: 4 / 3; background: var(--paper-2); }
+.food-pic img, .food-pic .ph { width: 100%; height: 100%; object-fit: cover; display: block; }
+.food-pic img { cursor: zoom-in; }
+.food-pic .ph { font-size: 42px; }
+.tried-stamp {
+  position: absolute; top: 8px; right: 8px; transform: rotate(8deg); padding: 0 8px; border-radius: 6px;
+  border: 2px solid var(--green); background: var(--card); color: var(--green); font: 700 18px var(--hand);
+}
+.food-body { flex: 1; display: flex; flex-direction: column; gap: 6px; padding: 10px 12px 12px; }
+.food-body h3 { margin: 0; font-family: var(--hand); font-size: 25px; line-height: 1; }
+.food-note { margin: 0; font-size: 13px; color: var(--note-ink); }
+.food-meta { display: flex; flex-wrap: wrap; gap: 2px 10px; font-size: 12px; font-weight: 700; color: var(--muted); }
+.food-meta:empty { display: none; }
+.food-meta .price { color: var(--gold); letter-spacing: .05em; }
+.food-meta .near { flex-basis: 100%; color: var(--blue); }
+.status { align-self: flex-start; padding: 2px 9px; border-radius: 99px; font-size: 12px; font-weight: 800; }
+.status.open { background: color-mix(in srgb, var(--green) 16%, var(--card)); color: var(--green); }
+.status.open.soon { background: color-mix(in srgb, var(--gold) 20%, var(--card)); color: var(--gold); }
+.status.later { background: var(--paper); color: var(--muted); }
+.status.closed { background: color-mix(in srgb, var(--red) 15%, var(--card)); color: var(--red); }
+.food-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; margin-top: auto; padding-top: 4px; }
+.tried-btn { border: 1.5px dashed var(--line); background: none; color: var(--muted); border-radius: 99px; padding: 3px 10px; font-size: 12px; font-weight: 800; }
+.tried-btn.on { border-style: solid; border-color: var(--green); color: var(--green); }
+.chip.plan-btn { background: var(--paper); }
+.food-actions .waze-btn { width: 28px; height: 28px; }
+.board-empty { color: var(--muted); }
+.food-pin {
+  width: 28px; height: 28px; border-radius: 50%; display: grid; place-items: center; font-size: 15px;
+  background: var(--card); border: 2px solid var(--gold); box-shadow: 0 2px 6px rgba(0,0,0,.25);
+}
+.food-pin.shut { filter: grayscale(1); opacity: .7; }
+.map-filter .food-toggle { --c: var(--gold); }
+
+dialog.add-plan { border: 0; border-radius: 16px; background: var(--card); color: var(--ink); box-shadow: var(--shadow-lg); padding: 20px; width: min(92vw, 380px); }
+dialog.add-plan::backdrop { background: rgba(30, 25, 20, .45); }
+.add-plan h3 { margin: 0 0 4px; font-family: var(--hand); font-size: 30px; }
+.add-plan-name { margin: 0 0 12px; font-weight: 700; }
+
+/* edit page: food options */
+.hours-row { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.hours-row > span { font-size: 12px; font-weight: 800; text-transform: uppercase; letter-spacing: .06em; color: var(--muted); }
+.hours-row input[type=time] { width: auto; flex: 1 1 110px; }

@@ -8,6 +8,7 @@ A mobile-first, scrapbook-style travel plan with two pages:
 ## Highlights
 - **Today view** — days fold away; on a trip day, that day opens with a "Now / Next" card. Preview with `?now=2026-11-19T12:40`.
 - **Weather** — daily forecast, rain chance per stop, and a rain-by-hour chart in the editor ([Open-Meteo](https://open-meteo.com), free, no key; available up to 16 days ahead).
+- **Food board** — food options to choose from on the go: open-now and area filters, sort by distance, 🎲 Pick for me, Tried ✓, add to plan, and 🍜 pins on the map.
 - **Closed-day warnings**, **Waze** navigation per stop, **night mode**, and **Soft / Standard** map colours.
 
 ## Photo art styles
