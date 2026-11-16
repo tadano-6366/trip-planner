@@ -63,7 +63,7 @@ The token is saved only in that browser, so repeat this step on each new device.
 - [x] Waze button (red lollipop) on each stop
 - [x] **Food board** (replaces Must-eat): options to pick from — filters (open now, area, hide tried),
       sort by distance to a day's stops or your location, 🎲 Pick for me, Tried ✓, ＋ Plan, 🍜 pins on the map
-- [ ] Fill in food options in the editor: stall name → 🔍 Find, area, price, opening hours, closed days
+- [ ] Fill in food options — easiest in bulk: fill `templates/food-board.md` (and `templates/day-plan.md` for the schedule), then ask Claude to apply it
 
 ### 6. Ideas for later (discuss with Claude)
 - [ ] Works offline / add to home screen
