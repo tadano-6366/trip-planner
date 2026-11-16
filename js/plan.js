@@ -219,10 +219,7 @@ function initMap() {
 
   const map = L.map('map', { zoomControl: false, scrollWheelZoom: true });
   L.control.zoom({ position: 'bottomright' }).addTo(map);
-  L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
-    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> &copy; <a href="https://carto.com/">CARTO</a>',
-    subdomains: 'abcd', maxZoom: 19,
-  }).addTo(map);
+  addTiles(map);
 
   const groups = [], markers = [];
   trip.days.forEach((d, i) => {
@@ -283,6 +280,39 @@ function initMap() {
       if (isDesktop()) go(); else { open(); setTimeout(go, 470); }
     },
   };
+}
+
+// Map images: try CARTO first; if this device/network can't load them, fall back to
+// OpenStreetMap's own tiles, and if those fail too, say so instead of a blank map.
+function addTiles(map) {
+  const OSM = '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>';
+  const providers = [
+    { url: 'https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', opts: { attribution: `${OSM} &copy; <a href="https://carto.com/">CARTO</a>`, subdomains: 'abcd', maxZoom: 19 } },
+    { url: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png', opts: { attribution: OSM, maxZoom: 19 } },
+  ];
+  let i = 0, layer;
+  const use = () => {
+    let loaded = 0, failed = 0;
+    if (layer) map.removeLayer(layer);
+    layer = L.tileLayer(providers[i].url, providers[i].opts)
+      .on('tileload', () => { loaded++; })
+      .on('tileerror', () => {
+        failed++;
+        if (loaded || failed < 4) return;
+        if (++i < providers.length) use();
+        else showMapNotice(map);
+      })
+      .addTo(map);
+  };
+  use();
+}
+
+function showMapNotice(map) {
+  if (document.querySelector('.map-notice')) return;
+  const n = document.createElement('div');
+  n.className = 'map-notice';
+  n.innerHTML = `<b>Map images can't load on this network.</b><br>Pins and routes still work. Try turning off an ad blocker or switching from Wi-Fi to mobile data.`;
+  map.getContainer().appendChild(n);
 }
 
 function flash(d, j) {

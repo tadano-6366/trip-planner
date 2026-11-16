@@ -336,11 +336,25 @@ async function geoSearch(btn, d, j) {
     box.innerHTML = res.length
       ? res.map((r) => `<button data-act="geo-pick" data-d="${d}" data-a="${j}" data-lat="${r.lat}" data-lng="${r.lon}" data-name="${esc(r.display_name)}">📍 ${esc(r.display_name)}</button>`).join('')
       : '<button disabled>No match — try a simpler name</button>';
-  } catch { box.innerHTML = '<button disabled>Search failed — check your connection</button>'; }
+  } catch { box.innerHTML = '<button disabled>Search failed on this network — try mobile data, or turn off an ad blocker</button>'; }
 }
+// Place search: OpenStreetMap Nominatim, falling back to Photon if Nominatim is
+// blocked or down. Both return [{ lat, lon, display_name }].
 async function nominatim(q) {
-  const r = await fetch(`https://nominatim.openstreetmap.org/search?format=json&limit=5&q=${encodeURIComponent(q)}`, { headers: { 'Accept-Language': 'en' } });
-  return r.json();
+  try {
+    const r = await fetch(`https://nominatim.openstreetmap.org/search?format=json&limit=5&q=${encodeURIComponent(q)}`, { headers: { 'Accept-Language': 'en' } });
+    if (!r.ok) throw new Error(r.status);
+    return await r.json();
+  } catch {
+    const r = await fetch(`https://photon.komoot.io/api/?limit=5&lang=en&q=${encodeURIComponent(q)}`);
+    if (!r.ok) throw new Error(r.status);
+    const { features = [] } = await r.json();
+    return features.map((f) => {
+      const p = f.properties;
+      return { lat: f.geometry.coordinates[1], lon: f.geometry.coordinates[0],
+        display_name: [p.name, p.street, p.city || p.county, p.state, p.country].filter(Boolean).join(', ') };
+    });
+  }
 }
 
 /* ---------- drag & drop ---------- */

@@ -42,6 +42,7 @@ The token is saved only in that browser, so repeat this step on each new device.
 - [ ] Cover shows the Penang sunset and the countdown
 - [ ] Day tabs follow as you scroll; tapping a card expands it
 - [ ] **Map** button opens a real map with numbered pins
+  (If the map is blank or shows "Map images can't load on this network", the device/network is blocking the map service — try mobile data or turn off an ad blocker. The app now falls back to OpenStreetMap automatically.)
 - [ ] Edit page: add a photo, try Watercolor / Pencil sketch / Anime
 - [ ] Publish works and the change appears on the live site
 
