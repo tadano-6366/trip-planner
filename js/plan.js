@@ -282,29 +282,18 @@ function initMap() {
   };
 }
 
-// Map images: try CARTO first; if this device/network can't load them, fall back to
-// OpenStreetMap's own tiles, and if those fail too, say so instead of a blank map.
+// Map images come from OpenStreetMap (free, no API key). If this device or network
+// can't load them, show a notice instead of a blank map; pins and routes still work.
+// (CARTO tiles were dropped: they now return "API key required" images.)
 function addTiles(map) {
-  const OSM = '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>';
-  const providers = [
-    { url: 'https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', opts: { attribution: `${OSM} &copy; <a href="https://carto.com/">CARTO</a>`, subdomains: 'abcd', maxZoom: 19 } },
-    { url: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png', opts: { attribution: OSM, maxZoom: 19 } },
-  ];
-  let i = 0, layer;
-  const use = () => {
-    let loaded = 0, failed = 0;
-    if (layer) map.removeLayer(layer);
-    layer = L.tileLayer(providers[i].url, providers[i].opts)
-      .on('tileload', () => { loaded++; })
-      .on('tileerror', () => {
-        failed++;
-        if (loaded || failed < 4) return;
-        if (++i < providers.length) use();
-        else showMapNotice(map);
-      })
-      .addTo(map);
-  };
-  use();
+  let loaded = 0, failed = 0;
+  L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+    maxZoom: 19,
+  })
+    .on('tileload', () => { loaded++; })
+    .on('tileerror', () => { if (!loaded && ++failed >= 4) showMapNotice(map); })
+    .addTo(map);
 }
 
 function showMapNotice(map) {
